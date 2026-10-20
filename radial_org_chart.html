@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example Publishing Co. Organizational Sunburst</title>
+    <style>
+        /* --- 1. BRANDING & BASICS --- */
+        :root {
+            --brand-navy: #002649;
+            --brand-blue: #65b2e8;
+            --paper: #fdfdf9;
+            --text-main: #1a1a1a;
+            --focus-ring: #d9534f;
+            --sidebar-width: 300px;
+        }
+
+        body {
+            font-family: "Adobe Caslon Pro", "Georgia", serif;
+            background-color: var(--paper);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex; /* Flex layout for sidebar + chart */
+            height: 100vh;
+        }
+
+        /* --- 2. SIDEBAR LAYOUT --- */
+        #sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid #ddd;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            z-index: 20;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            color: var(--brand-navy);
+            margin: 0 0 10px 0;
+            font-size: 1.6rem;
+            line-height: 1.2;
+        }
+
+        p.subtitle {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        /* Search Controls */
+        #search-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        label.search-label {
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--brand-navy);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select#employee-select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 14px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        select#employee-select:focus {
+            border-color: var(--brand-blue);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(101, 178, 232, 0.2);
+        }
+
+        /* --- 3. CHART AREA --- */
+        #chart-container {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--paper);
+            overflow: hidden;
+        }
+
+        /* Sunburst Slices */
+        path {
+            cursor: pointer;
+            transition: opacity 0.3s;
+            stroke: var(--paper);
+            stroke-width: 1px;
+        }
+
+        path:hover {
+            opacity: 0.8;
+        }
+
+        path:focus {
+            outline: none;
+            stroke: var(--focus-ring);
+            stroke-width: 3px;
+            z-index: 10; 
+        }
+
+        /* Text Labels */
+        text {
+            font-family: "Helvetica Neue", Helvetica, sans-serif;
+            font-size: 11px;
+            fill: #fff;
+            pointer-events: none;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+        }
+
+        /* Center navigation text */
+        .center-text {
+            font-family: "Adobe Caslon Pro", serif;
+            fill: var(--brand-navy);
+            pointer-events: none;
+            text-anchor: middle;
+            font-weight: bold;
+        }
+
+        /* --- 4. BOTTOM TITLE LABEL --- */
+        #bottom-label {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--brand-navy);
+            color: var(--brand-navy);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-family: "Adobe Caslon Pro", serif;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            pointer-events: none;
+            text-align: center;
+            min-width: 200px;
+            opacity: 0; /* Hidden initially */
+            transition: opacity 0.3s ease;
+        }
+
+        #bottom-label span.label-role {
+            display: block;
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 2px;
+            letter-spacing: 1px;
+        }
+
+        /* --- 5. TOOLTIP --- */
+        #tooltip {
+            position: absolute;
+            opacity: 0;
+            background: rgba(0, 38, 73, 0.95);
+            color: white;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: sans-serif;
+            font-size: 13px;
+            pointer-events: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 30;
+            max-width: 250px;
+            transition: opacity 0.2s;
+            text-align: center;
+        }
+        
+        #tooltip strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--brand-blue);
+        }
+
+        /* Accessibility Utilities */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <aside id="sidebar">
+        <header>
+            <h1>Example Publishing Co.<br>Organization</h1>
+            <p class="subtitle">Click a section to zoom in. Click center to zoom out.<br><br>Slices are sized by team count.</p>
+        </header>
+        
+        <div id="search-container">
+            <label for="employee-select" class="search-label">Find Employee</label>
+            <select id="employee-select">
+                <option value="" disabled selected>Select a name...</option>
+            </select>
+        </div>
+    </aside>
+
+    <div id="accessible-list-container" class="visually-hidden">
+        <h2>Organization List Structure</h2>
+        <ul id="accessible-list-root"></ul>
+    </div>
+
+    <main id="chart-container">
+        <!-- Chart is rendered here -->
+        <div id="bottom-label">
+            <span class="label-role">Title</span>
+            <span id="bottom-label-text">President & CEO</span>
+        </div>
+    </main>
+    
+    <div id="tooltip"></div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <script>
+        // --- 1. DATASET: RAW CSV DATA ---
+        const csvDataString = `node_id,node_manager_id,node_group_id,node_type,position_id,position_full_name,position_title,position_linked_in_url,job_id,job_title,job_application_link,job_application_email,group_name
+"p-1000","",,"position",1000,"Parker Alvarez","Chair of the Board",,,,,,"Executive/Management"
+"p-1001","p-1000",,"position",1001,"Oakley Hale","Vice President, Sales",,,,,,"Sales"
+"p-1002","p-1001",,"position",1002,"Logan Ellis","Regional Sales Manager",,,,,,"Sales"
+"p-1003","p-1002",,"position",1003,"Casey Santos","Sales Representative",,,,,,"Sales"
+"p-1004","p-1002",,"position",1004,"Taylor Alvarez","Account Executive",,,,,,"Sales"
+"p-1011","p-1001",,"position",1011,"Tatum Dalton","Regional Sales Manager",,,,,,"Sales"
+"p-1012","p-1011",,"position",1012,"Quinn Lindqvist","Account Executive",,,,,,"Sales"
+"p-1013","p-1011",,"position",1013,"Noor Zielinski","Account Executive",,,,,,"Sales"
+"p-1042","p-1000",,"position",1042,"Oakley Yilmaz","Editor-in-Chief",,,,,,"Editorial/Publishing"
+"p-1043","p-1042",,"position",1043,"Priya Nguyen","Senior Editor",,,,,,"Editorial/Publishing"
+"p-1044","p-1043",,"position",1044,"Avery Xu","Editorial Assistant",,,,,,"Editorial/Publishing"
+"p-1045","p-1043",,"position",1045,"Harper Quigley","Editorial Assistant",,,,,,"Editorial/Publishing"
+"p-1048","p-1042",,"position",1048,"Elliot Rivera","Senior Editor",,,,,,"Editorial/Publishing"
+"p-1049","p-1048",,"position",1049,"Sam Patel","Associate Editor",,,,,,"Editorial/Publishing"
+"p-1050","p-1048",,"position",1050,"Parker Dube","Associate Editor",,,,,,"Editorial/Publishing"
+"p-1067","p-1000",,"position",1067,"Rowan Xu","Vice President, Marketing",,,,,,"Marketing/Publicity"
+"p-1068","p-1067",,"position",1068,"Hana Hale","Marketing Manager",,,,,,"Marketing/Publicity"
+"p-1069","p-1068",,"position",1069,"Jamie Dalton","Marketing Associate",,,,,,"Marketing/Publicity"
+"p-1070","p-1068",,"position",1070,"Mateo Lindqvist","Publicist",,,,,,"Marketing/Publicity"
+"p-1075","p-1067",,"position",1075,"Jamie Rivera","Marketing Manager",,,,,,"Marketing/Publicity"
+"p-1076","p-1075",,"position",1076,"Mateo Foster","Publicist",,,,,,"Marketing/Publicity"
+"p-1077","p-1075",,"position",1077,"Omar Hale","Marketing Associate",,,,,,"Marketing/Publicity"
+"p-1088","p-1000",,"position",1088,"Morgan Santos","Creative Director",,,,,,"Design/Art"
+"p-1089","p-1088",,"position",1089,"Morgan Xu","Art Director",,,,,,"Design/Art"
+"p-1090","p-1089",,"position",1090,"Hana Quigley","Designer",,,,,,"Design/Art"
+"p-1091","p-1089",,"position",1091,"Morgan Quigley","Designer",,,,,,"Design/Art"
+"p-1095","p-1088",,"position",1095,"Taylor Tran","Art Director",,,,,,"Design/Art"
+"p-1096","p-1095",,"position",1096,"Sam Dube","Production Artist",,,,,,"Design/Art"
+"p-1097","p-1095",,"position",1097,"Kai Varga","Production Artist",,,,,,"Design/Art"
+"p-1100","p-1000",,"position",1100,"Reese Okafor","Chief Technology Officer",,,,,,"Technology/IT"
+"p-1101","p-1100",,"position",1101,"Riley Alvarez","Engineering Manager",,,,,,"Technology/IT"
+"p-1102","p-1101",,"position",1102,"Riley Rivera","Software Engineer",,,,,,"Technology/IT"
+"p-1103","p-1101",,"position",1103,"Noor Ellis","Software Engineer",,,,,,"Technology/IT"
+"p-1107","p-1100",,"position",1107,"Reese Tran","Engineering Manager",,,,,,"Technology/IT"
+"p-1108","p-1107",,"position",1108,"Reese Dube","Software Engineer",,,,,,"Technology/IT"
+"p-1109","p-1107",,"position",1109,"Rowan Ito","Software Engineer",,,,,,"Technology/IT"
+"p-1114","p-1000",,"position",1114,"Morgan Chen","Director of Production",,,,,,"Production"
+"p-1115","p-1114",,"position",1115,"Mateo Abbott","Production Manager",,,,,,"Production"
+"p-1116","p-1115",,"position",1116,"Avery Khan","Production Editor",,,,,,"Production"
+"p-1117","p-1115",,"position",1117,"Noor Foster","Production Editor",,,,,,"Production"
+"p-1120","p-1114",,"position",1120,"Sage Rivera","Production Manager",,,,,,"Production"
+"p-1121","p-1120",,"position",1121,"Sage Nguyen","Production Coordinator",,,,,,"Production"
+"p-1122","p-1120",,"position",1122,"Taylor Jensen","Production Editor",,,,,,"Production"
+"p-1124","p-1000",,"position",1124,"Marlow Varga","Vice President, Operations",,,,,,"Operations/Administration"
+"p-1125","p-1124",,"position",1125,"Ines Tran","Operations Manager",,,,,,"Operations/Administration"
+"p-1126","p-1125",,"position",1126,"Marlow Brandt","Operations Analyst",,,,,,"Operations/Administration"
+"p-1127","p-1125",,"position",1127,"Harper Costa","Operations Analyst",,,,,,"Operations/Administration"
+"p-1131","p-1000",,"position",1131,"Quinn Moreno","Chief Financial Officer",,,,,,"General Management"
+"p-1132","p-1131",,"position",1132,"Taylor Brandt","Finance Manager",,,,,,"General Management"
+"p-1133","p-1132",,"position",1133,"Jamie Abbott","Accountant",,,,,,"General Management"
+"p-1134","p-1132",,"position",1134,"Uma Jensen","Financial Analyst",,,,,,"General Management"
+"p-1137","p-1131",,"position",1137,"Oakley Lindqvist","Finance Manager",,,,,,"General Management"
+"p-1138","p-1137",,"position",1138,"Tatum Alvarez","Financial Analyst",,,,,,"General Management"
+"p-1139","p-1137",,"position",1139,"Noor Bennett","Accountant",,,,,,"General Management"
+"p-1143","p-1000",,"position",1143,"Jamie Lindqvist","General Counsel",,,,,,"Legal/Rights"
+"p-1144","p-1143",,"position",1144,"Mateo Chen","Rights Manager",,,,,,"Legal/Rights"
+"p-1145","p-1144",,"position",1145,"Parker Xu","Contracts Specialist",,,,,,"Legal/Rights"
+"p-1146","p-1144",,"position",1146,"Reese Varga","Contracts Specialist",,,,,,"Legal/Rights"
+"p-1147","p-1000",,"position",1147,"Ines Khan","Director, Human Resources",,,,,,"Human Resources"
+"p-1148","p-1147",,"position",1148,"Zara Whitfield","HR Manager",,,,,,"Human Resources"
+"p-1149","p-1148",,"position",1149,"Jamie Nguyen","HR Coordinator",,,,,,"Human Resources"
+"p-1150","p-1148",,"position",1150,"Harper Tran","HR Coordinator",,,,,,"Human Resources"`;
+
+        // --- 2. DATA PROCESSING LOGIC ---
+        
+        const parsedData = d3.csvParse(csvDataString);
+        const dataMap = new Map();
+        
+        // Manual Root: Alex Rivera
+        const manualRoot = {
+            id: "p-ROOT",
+            name: "Alex Rivera",
+            title: "President & CEO",
+            children: []
+        };
+        dataMap.set(manualRoot.id, manualRoot);
+
+        // Process CSV Rows into Node Objects
+        parsedData.forEach(row => {
+            dataMap.set(row.node_id, {
+                id: row.node_id,
+                name: row.position_full_name,
+                title: row.position_title,
+                parentId: row.node_manager_id,
+                children: []
+            });
+        });
+
+        // Build the Tree
+        parsedData.forEach(row => {
+            const node = dataMap.get(row.node_id);
+            let parentId = node.parentId;
+
+            if (!parentId || parentId.trim() === "") {
+                if (node.name.includes("Parker Alvarez")) {
+                    manualRoot.children.push(node);
+                } else {
+                    if (node.id !== manualRoot.id) {
+                         manualRoot.children.push(node);
+                    }
+                }
+            } else {
+                const parent = dataMap.get(parentId);
+                if (parent) {
+                    parent.children.push(node);
+                } else {
+                    manualRoot.children.push(node); 
+                }
+            }
+        });
+
+        const orgData = manualRoot; // Final Hierarchy
+
+        // --- 3. ACCESSIBILITY: BUILD INVISIBLE LIST ---
+        function buildAccessibleList(node, container) {
+            const li = document.createElement('li');
+            li.innerText = `${node.name} - ${node.title}`;
+            container.appendChild(li);
+
+            if (node.children && node.children.length > 0) {
+                const ul = document.createElement('ul');
+                li.appendChild(ul);
+                node.children.forEach(child => buildAccessibleList(child, ul));
+            }
+        }
+        document.getElementById('accessible-list-root').innerHTML = '';
+        buildAccessibleList(orgData, document.getElementById('accessible-list-root'));
+
+        // --- 4. D3 SUNBURST SETUP ---
+        const container = document.getElementById("chart-container");
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        const radius = Math.min(width, height) / 2.2;
+
+        const BRAND_NAVY = "#002649";
+        const BRAND_BLUE = "#65b2e8";
+
+        const colorScale = d3.scaleSequential()
+            .range([BRAND_NAVY, BRAND_BLUE, d3.color(BRAND_BLUE).brighter(1.5)]);
+
+        // Layout
+        const hierarchy = d3.hierarchy(orgData)
+            .sum(d => (d.children && d.children.length > 0) ? 0 : 1) // Count leaves
+            .sort((a, b) => b.value - a.value);
+
+        const root = d3.partition()
+            .size([2 * Math.PI, hierarchy.height + 1])
+            (hierarchy);
+
+        root.each(d => d.current = d);
+        colorScale.domain([root.height, 0]);
+
+        const MAX_DEPTH_VISIBLE = 6;
+        const SLICE_SIZE_FACTOR = 4; 
+        
+        const CHAR_WIDTH_PX = 7; 
+
+
+        // --- GLOBAL EMPLOYEE LOOKUP MAP ---
+        const employeeMap = new Map();
+        
+        function populateEmployeeMapAndDropdown(rootNode) {
+            const select = d3.select("#employee-select");
+            
+            rootNode.descendants().forEach(d => {
+                employeeMap.set(d.data.id, d);
+                if (d.data.id !== "p-ROOT") { 
+                    select.append("option")
+                        .attr("value", d.data.id)
+                        .text(d.data.name); 
+                }
+            });
+            
+            const options = select.selectAll("option").filter((d, i) => i > 0).nodes();
+            options.sort((a, b) => a.text.localeCompare(b.text));
+            options.forEach(option => select.node().appendChild(option));
+        }
+
+        // --- SMART LABELING LOGIC ---
+        function getSmartLabelText(d) {
+            const name = d.data.name;
+            const currentRadius = (d.y0 + d.y1) / 2 * radius / SLICE_SIZE_FACTOR;
+            const arcLengthPixels = currentRadius * (d.x1 - d.x0);
+            
+            // Padding safety (pixels)
+            const padding = 6; 
+            const availableSpace = arcLengthPixels - padding;
+
+            // Strategy 1: Full Name
+            if (name.length * CHAR_WIDTH_PX <= availableSpace) {
+                return name;
+            }
+
+            // Strategy 2: First Initial + Last Name (e.g. "S. Brennan")
+            const parts = name.split(" ");
+            if (parts.length > 1) {
+                const abbreviated = parts[0][0] + ". " + parts[parts.length - 1];
+                if (abbreviated.length * CHAR_WIDTH_PX <= availableSpace) {
+                    return abbreviated;
+                }
+            }
+
+            // Strategy 3: Initials only (e.g. "SB")
+            if (parts.length > 1) {
+                 const initials = parts[0][0] + parts[parts.length - 1][0];
+                 if (initials.length * CHAR_WIDTH_PX <= availableSpace) {
+                     return initials;
+                 }
+            }
+
+            // Strategy 4: Hide (return empty string)
+            return ""; 
+        }
+
+        // --- RENDER ---
+        const svg = d3.select("#chart-container").append("svg")
+            .attr("viewBox", [-width / 2, -height / 2, width, height])
+            .attr("width", width)
+            .attr("height", height)
+            .style("font", "12px sans-serif");
+
+        const arc = d3.arc()
+            .startAngle(d => d.x0)
+            .endAngle(d => d.x1)
+            .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
+            .padRadius(radius * 1.5)
+            .innerRadius(d => d.y0 * radius / SLICE_SIZE_FACTOR)
+            .outerRadius(d => Math.max(d.y0 * radius / SLICE_SIZE_FACTOR, d.y1 * radius / SLICE_SIZE_FACTOR - 1));
+
+        // Slices
+        const path = svg.append("g")
+            .selectAll("path")
+            .data(root.descendants().slice(1))
+            .join("path")
+            .attr("fill", d => colorScale(d.depth))
+            .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 0.9 : 0.7) : 0)
+            .attr("pointer-events", d => arcVisible(d.current) ? "auto" : "none")
+            .attr("d", d => arc(d.current))
+            .attr("role", "button")
+            .attr("tabindex", "0")
+            .attr("aria-label", d => `${d.data.name}, ${d.data.title}`)
+            .on("click", clicked);
+
+        // Labels - Now using getSmartLabelText
+        const label = svg.append("g")
+            .attr("pointer-events", "none")
+            .attr("text-anchor", "middle")
+            .style("user-select", "none")
+            .selectAll("text")
+            .data(root.descendants().slice(1))
+            .join("text")
+            .attr("dy", "0.35em")
+            .attr("fill-opacity", d => +labelVisible(d.current))
+            .attr("transform", d => labelTransform(d.current))
+            .text(d => getSmartLabelText(d));
+
+        // Center Parent Circle
+        const parent = svg.append("circle")
+            .datum(root)
+            .attr("r", radius / SLICE_SIZE_FACTOR)
+            .attr("fill", "#fff")
+            .attr("stroke", "#ccc")
+            .attr("pointer-events", "all")
+            .attr("cursor", "pointer")
+            .on("click", clicked);
+            
+        // Center Text
+        const centerLabel = svg.append("text")
+            .attr("class", "center-text")
+            .attr("pointer-events", "none")
+            .attr("dy", "0.35em")
+            .text(root.data.name)
+            .style("font-size", "1rem")
+            .attr("opacity", 1);
+            
+        populateEmployeeMapAndDropdown(root);
+        
+        // --- 7. INTERACTION LOGIC ---
+
+        function clicked(event, p) {
+            parent.datum(p.parent || root);
+
+            // 1. Update Center Label
+            centerLabel.text(p.data.name || root.data.name); 
+            centerLabel.attr("opacity", 1);
+            centerLabel.style("font-size", p === root ? "1rem" : "0.8rem");
+
+            // 2. Update Bottom Title Label
+            const bottomLabel = d3.select("#bottom-label");
+            const bottomLabelText = d3.select("#bottom-label-text");
+            
+            if (p === root) {
+                bottomLabelText.text(root.data.title);
+                bottomLabel.style("opacity", 0); 
+                d3.select("#employee-select").property('value', ""); 
+            } else {
+                bottomLabelText.text(p.data.title);
+                bottomLabel.style("opacity", 1);
+                if (p.data.id) {
+                    d3.select("#employee-select").property('value', p.data.id);
+                }
+            }
+
+            // 4. Perform Zoom Transition
+            root.each(d => d.target = {
+                x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+                x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+                y0: Math.max(0, d.y0 - p.depth),
+                y1: d.y1 - p.depth
+            });
+
+            const t = svg.transition().duration(750);
+
+            path.transition(t)
+                .tween("data", d => {
+                const i = d3.interpolate(d.current, d.target);
+                return t => d.current = i(t);
+                })
+                .filter(function(d) {
+                    return +this.getAttribute("fill-opacity") || arcVisible(d.target);
+                })
+                .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 0.9 : 0.7) : 0)
+                .attr("pointer-events", d => arcVisible(d.target) ? "auto" : "none") 
+                .attrTween("d", d => () => arc(d.current));
+
+            label.filter(function(d) {
+                // IMPORTANT: We must re-calculate the text during transition if the size changes!
+                // But D3 text transitions are complex.
+                // For simplicity, we just fade in/out based on the *new* size.
+                return +this.getAttribute("fill-opacity") || labelVisible(d.target);
+            }).transition(t)
+                .attr("fill-opacity", d => +labelVisible(d.target))
+                .attrTween("transform", d => () => labelTransform(d.current))
+                // Update text content based on new zoom level size
+                .text(d => {
+                    // We need to calculate based on d.target (the future state)
+                    // Construct a temp object mimicking the future state for size calc
+                    const futureState = {
+                        data: d.data,
+                        x0: d.target.x0, x1: d.target.x1,
+                        y0: d.target.y0, y1: d.target.y1
+                    };
+                    return getSmartLabelText(futureState);
+                });
+        }
+
+        // --- Dropdown Selection Handler ---
+        d3.select("#employee-select").on("change", function(event) {
+            const selectedId = event.target.value;
+            if (!selectedId) return;
+
+            const selectedNode = employeeMap.get(selectedId);
+            if (selectedNode) {
+                clicked(null, selectedNode); 
+            }
+        });
+
+
+        // --- 8. TOOLTIPS ---
+        const tooltip = d3.select("#tooltip");
+
+        path.on("mouseover", function(event, d) {
+            if (!arcVisible(d.current)) return;
+            
+            tooltip.style("opacity", 1)
+                .html(`<strong>${d.data.name}</strong>${d.data.title}<br/><small>Click to Zoom</small>`)
+                .style("left", (event.pageX + 15) + "px")
+                .style("top", (event.pageY - 15) + "px");
+                
+            d3.select(this).style("stroke", "#000").style("stroke-width", "2px");
+        })
+        .on("mouseout", function() {
+            tooltip.style("opacity", 0);
+            d3.select(this).style("stroke", "var(--paper)").style("stroke-width", "1px");
+        });
+
+        // --- 9. HELPERS ---
+        function arcVisible(d) {
+            return d.y1 <= MAX_DEPTH_VISIBLE && d.y0 >= 1 && d.x1 > d.x0;
+        }
+
+        function labelVisible(d) {
+            // Only verify angular visibility here. Text content check is in getSmartLabelText.
+            // But we double check to ensure we don't draw empty strings if not needed.
+            return d.y1 <= MAX_DEPTH_VISIBLE && d.y0 >= 1 && (d.x1 - d.x0) > 0.005; // relaxed angle check, strict text check
+        }
+
+        function labelTransform(d) {
+            const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
+            const radialPadding = 0.25; 
+            const y = ((d.y0 + d.y1) / 2 * radius / SLICE_SIZE_FACTOR) - radialPadding;
+            return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
+        }
+        
+        // Keyboard Support
+        path.on("keydown", (event, d) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                clicked(event, d);
+            }
+        });
+
+        // Resize Listener
+        window.addEventListener("resize", () => {
+             // Basic resize support
+        });
+
+    </script>
+</body>
+</html>

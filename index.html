@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Org Chart Prototypes</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 40px;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #002649; /* Brand navy */
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 15px;
+        }
+        .link-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .link-list a {
+            display: block;
+            background-color: #65b2e8; /* Brand blue */
+            color: white;
+            padding: 15px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+        .link-list a:hover {
+            background-color: #002649;
+            transform: translateY(-2px);
+        }
+        .link-list a:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Org Chart Prototypes</h1>
+        <p>Explore the two different D3.js visualization prototypes for the fictional "Example Publishing Co." organization (synthetic data).</p>
+        
+        <ul class="link-list">
+            <li>
+                <a href="radial_dendogram.html">Example #1: Collapsible Radial Dendrogram</a>
+            </li>
+            <li>
+                <a href="radial_sunburst.html">Example #2: Radial Sunburst</a>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

@@ -1,0 +1,152 @@
+node_id,manager_id,name,department,title
+1000,,Parker Alvarez,Executive/Management,Chair of the Board
+1001,1000,Oakley Hale,Sales,"Vice President, Sales"
+1002,1001,Logan Ellis,Sales,Regional Sales Manager
+1003,1002,Casey Santos,Sales,Sales Representative
+1004,1002,Taylor Alvarez,Sales,Account Executive
+1005,1002,Kai Hale,Sales,Sales Representative
+1006,1002,Jamie Whitfield,Sales,Sales Representative
+1007,1002,Logan Okafor,Sales,Account Executive
+1008,1002,Avery Yilmaz,Sales,Account Executive
+1009,1002,Mateo Khan,Sales,Sales Representative
+1010,1002,Sage Gupta,Sales,Account Executive
+1011,1001,Tatum Dalton,Sales,Regional Sales Manager
+1012,1011,Quinn Lindqvist,Sales,Account Executive
+1013,1011,Noor Zielinski,Sales,Account Executive
+1014,1011,Omar Rivera,Sales,Sales Representative
+1015,1011,Yusuf Chen,Sales,Sales Representative
+1016,1011,Wren Santos,Sales,Account Executive
+1017,1011,Riley Bennett,Sales,Sales Representative
+1018,1001,Logan Yilmaz,Sales,Regional Sales Manager
+1019,1018,Logan Brandt,Sales,Sales Representative
+1020,1018,Yusuf Ito,Sales,Sales Representative
+1021,1018,Wren Foster,Sales,Account Executive
+1022,1018,Uma Gupta,Sales,Account Executive
+1023,1018,Riley Tran,Sales,Account Executive
+1024,1018,Marlow Foster,Sales,Sales Representative
+1025,1018,Logan Varga,Sales,Account Executive
+1026,1001,Sam Abbott,Sales,Regional Sales Manager
+1027,1026,Taylor Zielinski,Sales,Sales Representative
+1028,1026,Zara Ito,Sales,Account Executive
+1029,1026,Kai Dube,Sales,Sales Representative
+1030,1026,Kai Underwood,Sales,Account Executive
+1031,1026,Zara Costa,Sales,Account Executive
+1032,1026,Sage Ito,Sales,Account Executive
+1033,1001,Rowan Hale,Sales,Regional Sales Manager
+1034,1033,Mateo Costa,Sales,Account Executive
+1035,1033,Wren Hale,Sales,Account Executive
+1036,1033,Diego Chen,Sales,Sales Representative
+1037,1033,Parker Ellis,Sales,Sales Representative
+1038,1033,Mateo Tran,Sales,Sales Representative
+1039,1033,Yusuf Moreno,Sales,Sales Representative
+1040,1033,Noor Rivera,Sales,Account Executive
+1041,1033,Parker Varga,Sales,Sales Representative
+1042,1000,Oakley Yilmaz,Editorial/Publishing,Editor-in-Chief
+1043,1042,Priya Nguyen,Editorial/Publishing,Senior Editor
+1044,1043,Avery Xu,Editorial/Publishing,Editorial Assistant
+1045,1043,Harper Quigley,Editorial/Publishing,Editorial Assistant
+1046,1043,Reese Abbott,Editorial/Publishing,Associate Editor
+1047,1043,Sage Lindqvist,Editorial/Publishing,Associate Editor
+1048,1042,Elliot Rivera,Editorial/Publishing,Senior Editor
+1049,1048,Sam Patel,Editorial/Publishing,Associate Editor
+1050,1048,Parker Dube,Editorial/Publishing,Associate Editor
+1051,1048,Reese Hale,Editorial/Publishing,Editorial Assistant
+1052,1048,Marlow Costa,Editorial/Publishing,Associate Editor
+1053,1048,Casey Xu,Editorial/Publishing,Associate Editor
+1054,1048,Riley Yilmaz,Editorial/Publishing,Editorial Assistant
+1055,1042,Rowan Ellis,Editorial/Publishing,Senior Editor
+1056,1055,Elliot Ito,Editorial/Publishing,Editorial Assistant
+1057,1055,Reese Moreno,Editorial/Publishing,Editorial Assistant
+1058,1055,Lena Costa,Editorial/Publishing,Editorial Assistant
+1059,1055,Parker Hale,Editorial/Publishing,Editorial Assistant
+1060,1055,Riley Khan,Editorial/Publishing,Associate Editor
+1061,1055,Logan Santos,Editorial/Publishing,Associate Editor
+1062,1042,Logan Alvarez,Editorial/Publishing,Senior Editor
+1063,1062,Logan Chen,Editorial/Publishing,Associate Editor
+1064,1062,Tatum Chen,Editorial/Publishing,Associate Editor
+1065,1062,Oakley Varga,Editorial/Publishing,Associate Editor
+1066,1062,Kai Rivera,Editorial/Publishing,Editorial Assistant
+1067,1000,Rowan Xu,Marketing/Publicity,"Vice President, Marketing"
+1068,1067,Hana Hale,Marketing/Publicity,Marketing Manager
+1069,1068,Jamie Dalton,Marketing/Publicity,Marketing Associate
+1070,1068,Mateo Lindqvist,Marketing/Publicity,Publicist
+1071,1068,Ines Okafor,Marketing/Publicity,Marketing Associate
+1072,1068,Quinn Bennett,Marketing/Publicity,Publicist
+1073,1068,Tatum Zielinski,Marketing/Publicity,Marketing Associate
+1074,1068,Marlow Gupta,Marketing/Publicity,Publicist
+1075,1067,Jamie Rivera,Marketing/Publicity,Marketing Manager
+1076,1075,Mateo Foster,Marketing/Publicity,Publicist
+1077,1075,Omar Hale,Marketing/Publicity,Marketing Associate
+1078,1075,Lena Zielinski,Marketing/Publicity,Publicist
+1079,1075,Morgan Underwood,Marketing/Publicity,Publicist
+1080,1075,Casey Dube,Marketing/Publicity,Publicist
+1081,1075,Elliot Nguyen,Marketing/Publicity,Publicist
+1082,1067,Diego Patel,Marketing/Publicity,Marketing Manager
+1083,1082,Morgan Foster,Marketing/Publicity,Marketing Associate
+1084,1082,Avery Moreno,Marketing/Publicity,Marketing Associate
+1085,1082,Omar Jensen,Marketing/Publicity,Marketing Associate
+1086,1082,Diego Ellis,Marketing/Publicity,Marketing Associate
+1087,1082,Priya Gupta,Marketing/Publicity,Publicist
+1088,1000,Morgan Santos,Design/Art,Creative Director
+1089,1088,Morgan Xu,Design/Art,Art Director
+1090,1089,Hana Quigley,Design/Art,Designer
+1091,1089,Morgan Quigley,Design/Art,Designer
+1092,1089,Harper Chen,Design/Art,Designer
+1093,1089,Marlow Moreno,Design/Art,Designer
+1094,1089,Marlow Santos,Design/Art,Designer
+1095,1088,Taylor Tran,Design/Art,Art Director
+1096,1095,Sam Dube,Design/Art,Production Artist
+1097,1095,Kai Varga,Design/Art,Production Artist
+1098,1095,Marlow Ito,Design/Art,Production Artist
+1099,1095,Rowan Varga,Design/Art,Production Artist
+1100,1000,Reese Okafor,Technology/IT,Chief Technology Officer
+1101,1100,Riley Alvarez,Technology/IT,Engineering Manager
+1102,1101,Riley Rivera,Technology/IT,Software Engineer
+1103,1101,Noor Ellis,Technology/IT,Software Engineer
+1104,1101,Riley Costa,Technology/IT,Systems Analyst
+1105,1101,Wren Jensen,Technology/IT,Software Engineer
+1106,1101,Lena Abbott,Technology/IT,Software Engineer
+1107,1100,Reese Tran,Technology/IT,Engineering Manager
+1108,1107,Reese Dube,Technology/IT,Software Engineer
+1109,1107,Rowan Ito,Technology/IT,Software Engineer
+1110,1107,Quinn Xu,Technology/IT,Software Engineer
+1111,1107,Oakley Jensen,Technology/IT,Software Engineer
+1112,1107,Tatum Gupta,Technology/IT,Software Engineer
+1113,1107,Diego Ito,Technology/IT,Systems Analyst
+1114,1000,Morgan Chen,Production,Director of Production
+1115,1114,Mateo Abbott,Production,Production Manager
+1116,1115,Avery Khan,Production,Production Editor
+1117,1115,Noor Foster,Production,Production Editor
+1118,1115,Mateo Rivera,Production,Production Coordinator
+1119,1115,Parker Chen,Production,Production Editor
+1120,1114,Sage Rivera,Production,Production Manager
+1121,1120,Sage Nguyen,Production,Production Coordinator
+1122,1120,Taylor Jensen,Production,Production Editor
+1123,1120,Taylor Costa,Production,Production Coordinator
+1124,1000,Marlow Varga,Operations/Administration,"Vice President, Operations"
+1125,1124,Ines Tran,Operations/Administration,Operations Manager
+1126,1125,Marlow Brandt,Operations/Administration,Operations Analyst
+1127,1125,Harper Costa,Operations/Administration,Operations Analyst
+1128,1125,Jordan Foster,Operations/Administration,Administrative Assistant
+1129,1125,Ines Zielinski,Operations/Administration,Administrative Assistant
+1130,1125,Oakley Foster,Operations/Administration,Operations Analyst
+1131,1000,Quinn Moreno,General Management,Chief Financial Officer
+1132,1131,Taylor Brandt,General Management,Finance Manager
+1133,1132,Jamie Abbott,General Management,Accountant
+1134,1132,Uma Jensen,General Management,Financial Analyst
+1135,1132,Jamie Moreno,General Management,Accountant
+1136,1132,Oakley Brandt,General Management,Financial Analyst
+1137,1131,Oakley Lindqvist,General Management,Finance Manager
+1138,1137,Tatum Alvarez,General Management,Financial Analyst
+1139,1137,Noor Bennett,General Management,Accountant
+1140,1137,Sam Nguyen,General Management,Accountant
+1141,1137,Yusuf Costa,General Management,Accountant
+1142,1137,Mateo Alvarez,General Management,Accountant
+1143,1000,Jamie Lindqvist,Legal/Rights,General Counsel
+1144,1143,Mateo Chen,Legal/Rights,Rights Manager
+1145,1144,Parker Xu,Legal/Rights,Contracts Specialist
+1146,1144,Reese Varga,Legal/Rights,Contracts Specialist
+1147,1000,Ines Khan,Human Resources,"Director, Human Resources"
+1148,1147,Zara Whitfield,Human Resources,HR Manager
+1149,1148,Jamie Nguyen,Human Resources,HR Coordinator
+1150,1148,Harper Tran,Human Resources,HR Coordinator

@@ -1,0 +1,8 @@
+{
+  "name": "accessible-org-chart",
+  "version": "1.0.0",
+  "description": "Static D3.js prototypes of organizational charts (synthetic data), built for WCAG.",
+  "scripts": {
+    "start": "open index.html"
+  }
+}
