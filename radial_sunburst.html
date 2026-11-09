@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Example Publishing Co. Organizational Sunburst</title>
+    <title>W. W. Norton &amp; Company — Organizational Chart</title>
     <style>
         /* --- 1. BRANDING & BASICS --- */
         :root {
@@ -235,7 +235,7 @@
 
     <aside id="sidebar">
         <header>
-            <h1>Example Publishing Co.<br>Organization</h1>
+            <h1>W. W. Norton &amp; Company<br>Organization</h1>
             <p class="subtitle">Click a section to zoom in. Click center to zoom out.<br>Slices are sized by team count.<br><br>Use <strong>Tab</strong> to navigate and <strong>Enter</strong> to zoom.</p>
         </header>
         
@@ -368,9 +368,9 @@
             // Manual Root
             const manualRoot = {
                 id: "p-ROOT",
-                name: "Alex Rivera",
-                title: "President & CEO",
-                department: "Executive",
+                name: "W. W. Norton & Company",
+                title: "Independent Publisher",
+                department: "",
                 children: []
             };
             dataMap.set(manualRoot.id, manualRoot);
@@ -411,11 +411,7 @@
 
                 // Handle Roots & Orphans
                 if (!parentId || parentId.trim() === "") {
-                    // Logic for top-level nodes (Parker Alvarez)
-                    if (node.name && node.name.includes("Parker Alvarez")) {
-                        manualRoot.children.push(node);
-                    } else if (node.id !== manualRoot.id) {
-                        // Fallback attachment
+                    if (node.id !== manualRoot.id) {
                         manualRoot.children.push(node);
                     }
                 } else {
