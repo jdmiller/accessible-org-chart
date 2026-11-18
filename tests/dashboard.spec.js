@@ -196,15 +196,64 @@ test.describe('Sunburst zoom', () => {
       });
       return w;
     });
-    expect(await worst()).toBeGreaterThanOrEqual(4);
     const ids = await page.evaluate(() =>
       [...sunburstNodeMap.values()].filter(n => n.height >= 2 && n.depth >= 2).sort((a, b) => b.value - a.value).slice(0, 2).map(n => n.data.id));
-    for (const id of ids) {
-      await page.evaluate(id => zoomSunburst(null, sunburstNodeMap.get(id)), id);
-      for (let i = 0; i < 4; i++) { await page.waitForTimeout(150); expect(await worst()).toBeGreaterThanOrEqual(4); }
-      await page.waitForTimeout(500);
+    for (const mode of ['name', 'title']) {
+      await page.check(`#label-mode input[value="${mode}"]`);
+      await page.evaluate(() => zoomSunburst(null, root));
+      await page.waitForTimeout(900);
       expect(await worst()).toBeGreaterThanOrEqual(4);
+      for (const id of ids) {
+        await page.evaluate(id => zoomSunburst(null, sunburstNodeMap.get(id)), id);
+        for (let i = 0; i < 4; i++) { await page.waitForTimeout(150); expect(await worst()).toBeGreaterThanOrEqual(4); }
+        await page.waitForTimeout(500);
+        expect(await worst()).toBeGreaterThanOrEqual(4);
+      }
     }
+  });
+
+  test('Names / Titles switch changes the slice labels and is remembered', async ({ page }) => {
+    await page.setViewportSize({ width: 1300, height: 820 });
+    await page.goto(fileUrl);
+    await waitForLoad(page);
+    const shown = () => page.evaluate(() => {
+      const out = [];
+      label.each(function (d) {
+        if (+this.getAttribute('fill-opacity') > 0 && this.textContent) {
+          const lines = [...this.querySelectorAll('tspan')].map(t => t.textContent);
+          out.push({ text: lines.join(' '), name: d.data.name,
+                     isTitle: !!d.data.title && titleOptions(d.data.title).some(o => o.join('|') === lines.join('|')) });
+        }
+      });
+      return out;
+    });
+    const names = await shown();
+    expect(names.length).toBeGreaterThan(0);
+    // Name labels are the name or an abbreviation of it, never the title
+    expect(names.every(l => l.text[0] === l.name[0] && !l.isTitle)).toBe(true);
+
+    await page.click('#label-mode label:last-of-type');            // Titles
+    expect(await page.isChecked('#label-mode input[value="title"]')).toBe(true);
+    // Expand a team so there's room for titles
+    const id = await page.evaluate(() =>
+      [...sunburstNodeMap.values()].filter(n => n.height === 1).sort((a, b) => b.value - a.value)[0].data.id);
+    await page.evaluate(id => zoomSunburst(null, sunburstNodeMap.get(id)), id);
+    await page.waitForTimeout(1000);
+    const titles = await shown();
+    expect(titles.length).toBeGreaterThan(0);
+    // Every label is the person's title, in full or shortened form
+    expect(titles.every(l => l.isTitle)).toBe(true);
+    // The centre and bottom label still name the focused person
+    const focus = await page.evaluate(() => currentSbNode.data.name);
+    expect(await page.textContent('.center-name-line1')).toBe(focus.split(' ')[0]);
+
+    await page.reload();
+    await waitForLoad(page);
+    expect(await page.isChecked('#label-mode input[value="title"]')).toBe(true);
+    // Arrow keys switch it like any radio group
+    await page.focus('#label-mode input:checked');
+    await page.keyboard.press('ArrowLeft');
+    expect(await page.evaluate(() => labelMode)).toBe('name');
   });
 
   test('each team is centred within its parent slice', async ({ page }) => {

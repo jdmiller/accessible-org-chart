@@ -365,12 +365,29 @@
 
 
         /* ---- Chart zoom controls (outside the aria-hidden chart) ---- */
-        #zoom-controls {
+        #chart-tools {
             position: fixed; top: 10px; right: 14px; z-index: 15;
-            display: flex; align-items: center; gap: 4px;
+            display: flex; align-items: center; gap: 14px;
             font-family: "Helvetica Neue", sans-serif;
         }
-        #zoom-controls[hidden] { display: none; }
+        #chart-tools[hidden] { display: none; }
+        #zoom-controls { display: flex; align-items: center; gap: 4px; }
+        /* Names / Titles: native radios drawn as a two-option switch */
+        #label-mode { display: flex; align-items: center; font-size: 11px; color: var(--brand-navy); }
+        #label-mode-label { margin-right: 6px; }
+        #label-mode label {
+            position: relative; display: inline-flex; align-items: center;
+            height: 32px; padding: 0 12px; cursor: pointer;
+            border: 1px solid var(--brand-navy); background: white; color: var(--brand-navy);
+            font-size: 12px;
+        }
+        #label-mode label:first-of-type { border-radius: 4px 0 0 4px; }
+        #label-mode label:last-of-type  { border-radius: 0 4px 4px 0; border-left: none; }
+        #label-mode label:hover { background: #eef6f9; }
+        #label-mode label:has(input:checked) { background: var(--brand-navy); color: white; font-weight: 600; }
+        #label-mode label:has(input:focus-visible) { outline: 2px solid var(--focus-ring); outline-offset: 2px; z-index: 1; }
+        /* The radio stays in place (focusable, operable, announced), just invisible */
+        #label-mode input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
         #zoom-controls button {
             min-width: 32px; height: 32px; padding: 0 10px; border-radius: 4px;
             border: 1px solid var(--brand-navy);
@@ -626,11 +643,20 @@
 <!-- Chart magnification. A real control group outside the aria-hidden chart,
      so keyboard and switch users can zoom too. Zoom centres on the person
      focused in the tree (or the chart centre). -->
-<div id="zoom-controls" role="group" aria-label="Chart zoom">
-    <button id="zoom-out" type="button" aria-label="Zoom out" aria-disabled="true">&minus;</button>
-    <span id="zoom-level" aria-hidden="true">100%</span>
-    <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
-    <button id="zoom-reset" type="button" aria-label="Reset zoom" aria-disabled="true">Reset</button>
+<div id="chart-tools">
+    <!-- Which text the chart's slices show. Visual only: the chart is
+         aria-hidden and the tree already gives every name and title. -->
+    <div id="label-mode" role="radiogroup" aria-labelledby="label-mode-label">
+        <span id="label-mode-label">Chart labels</span>
+        <label><input type="radio" name="label-mode" value="name" checked> Names</label>
+        <label><input type="radio" name="label-mode" value="title"> Titles</label>
+    </div>
+    <div id="zoom-controls" role="group" aria-label="Chart zoom">
+        <button id="zoom-out" type="button" aria-label="Zoom out" aria-disabled="true">&minus;</button>
+        <span id="zoom-level" aria-hidden="true">100%</span>
+        <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+        <button id="zoom-reset" type="button" aria-label="Reset zoom" aria-disabled="true">Reset</button>
+    </div>
 </div>
 <p id="zoom-hint">Scroll to expand the branch under the pointer &middot; drag to pan &middot; <kbd>+</kbd>/<kbd>&minus;</kbd> in the list</p>
 <div id="zoom-announce" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -689,6 +715,7 @@ s-016,s-005,Nora Kim,Controller,Finance`;
 let sbColorScale;
 let root, arc, path, label, tooltipSel, container, width, height, radius, svg;
 let currentSbNode;
+let labelMode = "name";     // "name" | "title": what the slice labels show
 
 const SLICE_SIZE_FACTOR = 4;
 const MAX_DEPTH_VISIBLE  = 6;
@@ -1836,7 +1863,7 @@ function keyboardDrillTarget() {
 }
 
 function setMagnifierHidden(hidden) {
-    document.getElementById("zoom-controls").hidden = hidden;
+    document.getElementById("chart-tools").hidden = hidden;
     document.getElementById("zoom-hint").hidden = hidden;
 }
 
@@ -1846,6 +1873,21 @@ function setMagnifierHidden(hidden) {
         zoomStep(dir);
     });
     on("zoom-in", 1); on("zoom-out", -1); on("zoom-reset", 0);
+})();
+
+// Names / Titles switch for the slice labels. Remembered per browser;
+// everything else (fitting, padding, zoom) works the same in both modes.
+(function wireLabelMode() {
+    try { if (localStorage.getItem("chartLabelMode") === "title") labelMode = "title"; } catch (e) {}
+    document.querySelectorAll('#label-mode input').forEach(input => {
+        input.checked = input.value === labelMode;
+        input.addEventListener("change", () => {
+            if (!input.checked) return;
+            labelMode = input.value;
+            try { localStorage.setItem("chartLabelMode", labelMode); } catch (e) {}
+            if (svg) renderView();
+        });
+    });
 })();
 
 // =================================================================
@@ -1938,7 +1980,57 @@ function labelFits(g, lines) {
     return r1 * Math.sin(a) - halfH * Math.cos(a) >= LABEL_PAD_T;
 }
 
+// Title labels: the full title on 1-3 lines, then a shortened form on 1-3 lines.
+const TITLE_ABBR = [
+    [/\bVice President\b/g, "VP"], [/\bSenior\b/g, "Sr."], [/\bAssociate\b/g, "Assoc."],
+    [/\bAssistant\b/g, "Asst."], [/\bDirector\b/g, "Dir."], [/\bManager\b/g, "Mgr."],
+    [/\bCoordinator\b/g, "Coord."], [/\bExecutive\b/g, "Exec."], [/\bMarketing\b/g, "Mktg."],
+    [/\bDevelopment\b/g, "Dev."], [/\bDepartment\b/g, "Dept."], [/\bInternational\b/g, "Intl."],
+    [/\bOperations\b/g, "Ops."], [/\bTechnology\b/g, "Tech."], [/\bAdministrative\b/g, "Admin."],
+    [/\bRepresentative\b/g, "Rep."], [/\bInformation\b/g, "Info."], [/\bProduction\b/g, "Prod."],
+    [/\bSpecialist\b/g, "Spec."], [/\band\b/g, "&"],
+];
+// Split words into k lines with the narrowest longest line
+function wrapWords(words, k) {
+    if (k === 1 || words.length < k) return k === 1 ? [words.join(" ")] : null;
+    let best = null, bestW = Infinity;
+    const tryCut = (start, left, acc) => {
+        if (left === 1) {
+            const lines = [...acc, words.slice(start).join(" ")];
+            const w = Math.max(...lines.map(labelTextWidth));
+            if (w < bestW) { bestW = w; best = lines; }
+            return;
+        }
+        for (let i = start + 1; i <= words.length - (left - 1); i++)
+            tryCut(i, left - 1, [...acc, words.slice(start, i).join(" ")]);
+    };
+    tryCut(0, k, []);
+    return best;
+}
+const _titleOptions = new Map();
+function titleOptions(title) {
+    let opts = _titleOptions.get(title);
+    if (opts) return opts;
+    let short = title;
+    for (const [re, abbr] of TITLE_ABBR) short = short.replace(re, abbr);
+    opts = [];
+    for (const t of short === title ? [title] : [title, short]) {
+        const words = t.split(/\s+/).filter(Boolean);
+        for (let k = 1; k <= 3; k++) {
+            const l = wrapWords(words, k);
+            // A line break already separates "Director, / Trade Sales": drop the comma
+            if (l) opts.push(l.map((line, i) => i < l.length - 1 ? line.replace(/,$/, "") : line));
+        }
+    }
+    _titleOptions.set(title, opts);
+    return opts;
+}
+
 function getLabelLines(d) {
+    if (labelMode === "title") {
+        const title = d && d.data && (d.data.title || "").trim();
+        return title ? (titleOptions(title).find(lines => labelFits(d, lines)) || []) : [];
+    }
     if (!d || !d.data || !d.data.name) return [];
     const name   = d.data.name;
     const fit    = lines => labelFits(d, lines);
@@ -1986,13 +2078,12 @@ function setLabelTspans(textEl, lines) {
         return;
     }
     sel.attr('visibility', null);
-    if (lines.length === 1) {
-        sel.append("tspan").attr("x", 0).attr("dy", "0em").text(lines[0]);
-    } else {
-        // Two lines centered: shift first up, second down
-        sel.append("tspan").attr("x", 0).attr("dy", "-0.55em").text(lines[0]);
-        sel.append("tspan").attr("x", 0).attr("dy", "1.1em").text(lines[1]);
-    }
+    // Lines 1.1em apart, centred on the slice
+    lines.forEach((line, i) => {
+        sel.append("tspan").attr("x", 0)
+            .attr("dy", i === 0 ? `${(-0.55 * (lines.length - 1)).toFixed(2)}em` : "1.1em")
+            .text(line);
+    });
 }
 
 // =================================================================
