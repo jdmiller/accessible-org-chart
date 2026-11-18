@@ -1,0 +1,2437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example Publishing Co. — Organization Chart</title>
+    <style>
+        :root {
+            --brand-navy: #002649;
+            --brand-blue: #7cc9de;
+            --paper: #fdfdf9;
+            --text-main: #1a1a1a;
+            --focus-ring: #d9534f;
+            --tree-width: 320px;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Adobe Caslon Pro", "Georgia", serif;
+            background: var(--paper);
+            color: var(--text-main);
+            margin: 0; padding: 0;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* =============================================================
+           LEFT PANEL — primary accessible interface
+           All keyboard and screen-reader interaction happens here.
+           ============================================================= */
+        #tree-panel {
+            width: var(--tree-width);
+            min-width: var(--tree-width);
+            background: white;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow: hidden;
+            z-index: 20;
+        }
+
+        #tree-header {
+            padding: 16px 16px 10px;
+            border-bottom: 1px solid #eee;
+            flex-shrink: 0;
+        }
+        #tree-header h1 {
+            font-size: 1rem;
+            color: var(--brand-navy);
+            margin: 0 0 4px;
+            line-height: 1.3;
+        }
+        #tree-status {
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 0.7rem;
+            color: #999;
+            margin: 0;
+        }
+
+        #fallback-banner {
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #5c4300;
+            background: #fff3cd;
+            border: 1px solid #e0c36a;
+            border-radius: 3px;
+            padding: 4px 8px;
+            margin: 6px 0 0;
+        }
+        #fallback-banner[hidden] { display: none; }
+
+        #tree-search {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            flex-shrink: 0;
+        }
+        #tree-search label {
+            display: block;
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--brand-navy);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        #tree-search-input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: "Helvetica Neue", sans-serif;
+            background: #f9f9f9;
+            color: var(--text-main);
+            outline: none;
+        }
+        #tree-search-input:focus {
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 2px rgba(124,201,222,0.2);
+        }
+
+        /* tree scroll area */
+        #tree-scroll {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 4px 0 8px;
+        }
+        #tree-scroll[hidden] { display: none; }
+        #tornado-controls-row {
+            display: flex; align-items: flex-start; gap: 16px;
+            margin-bottom: 10px; flex-wrap: wrap;
+        }
+        #tornado-search-wrap { margin: 0; font-family: "Helvetica Neue", sans-serif; flex: 1 1 200px; }
+        #tornado-search-wrap label {
+            display: block; font-size: 11px; font-weight: 700; color: var(--brand-navy);
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+        }
+        #tornado-search {
+            width: 100%; max-width: 260px; padding: 6px 10px; border: 1px solid #ccc;
+            border-radius: 4px; font-size: 12px; font-family: "Helvetica Neue", sans-serif;
+        }
+        #tornado-search:focus { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+        #tornado-search-status { font-size: 11px; color: #002649; margin-left: 8px; }
+        #tornado-bucket-wrap { flex: 1 1 240px; font-family: "Helvetica Neue", sans-serif; }
+        #tree-scroll::-webkit-scrollbar { width: 5px; }
+        #tree-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+        /* ---- WAI-ARIA tree widget ----
+           Semantic: ul[role=tree] > li[role=treeitem] > ul[role=group]
+           Children visibility is driven by aria-expanded on the li,
+           which CSS maps to display:block/none on the ul[role=group].        */
+        ul[role="tree"],
+        ul[role="group"] {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        /* Collapsed by default */
+        ul[role="group"] { display: none; }
+        li[role="treeitem"][aria-expanded="true"] > ul[role="group"] { display: block; }
+
+        /* Hide items filtered out by search */
+        li[role="treeitem"].search-hidden { display: none; }
+
+        /* Focus ring lives on the li; we show it on its inner .tree-row */
+        li[role="treeitem"] { outline: none; }
+        li[role="treeitem"]:focus > .tree-row {
+            outline: 2px solid var(--focus-ring);
+            outline-offset: -2px;
+            background: #fff8f7;
+        }
+
+        .tree-row {
+            display: flex;
+            align-items: flex-start;
+            padding: 4px 8px 4px 0;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.1s;
+        }
+        .tree-row:hover { background: #f0f5fa; }
+
+        li[role="treeitem"][aria-selected="true"] > .tree-row {
+            background: #e6f3fb;
+            border-left-color: var(--brand-blue);
+        }
+        li[role="treeitem"][aria-selected="true"] > .tree-row .item-name {
+            color: var(--brand-navy);
+            font-weight: 700;
+        }
+        li[role="treeitem"].search-match > .tree-row .item-name {
+            font-weight: 700;
+        }
+
+        .tree-toggle {
+            width: 18px; min-width: 18px;
+            font-size: 8px; color: #bbb;
+            padding-top: 3px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .tree-toggle.has-children { color: #777; }
+
+        .item-content { flex: 1; min-width: 0; }
+        .item-name {
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 12px; color: #222;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            line-height: 1.5;
+        }
+        .item-meta {
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 10px; color: #999;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        /* ---- Detail / live region at the bottom of the left panel ---- */
+        #detail-panel {
+            border-top: 1px solid #eee;
+            padding: 12px 14px;
+            flex-shrink: 0;
+            min-height: 72px;
+        }
+        #detail-panel.empty {
+            /* Keep space reserved so the panel doesn't jump,
+               but hide the text */
+            visibility: hidden;
+        }
+        .detail-name {
+            font-family: "Adobe Caslon Pro", serif;
+            font-size: 1rem; font-weight: bold;
+            color: var(--brand-navy); margin-bottom: 2px;
+        }
+        .detail-title {
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 0.72rem; text-transform: uppercase;
+            letter-spacing: 0.5px; color: #555; margin-bottom: 2px;
+        }
+        .detail-dept {
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 0.72rem; font-style: italic;
+            color: var(--brand-blue); margin-bottom: 2px;
+        }
+        .detail-reports {
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 0.68rem; color: #aaa;
+        }
+
+        #disclaimer-btn {
+            display: block;
+            margin: 8px 0 0;
+            padding: 5px 10px;
+            background: #fff8e1;
+            border: 1px solid #e0c36a;
+            border-radius: 4px;
+            color: #5c4300;
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+        }
+        #disclaimer-btn:hover { background: #ffeaa0; }
+        #disclaimer-btn:focus { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+        #disclaimer-modal {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 200;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #disclaimer-modal[hidden] { display: none; }
+        #disclaimer-modal-box {
+            background: white;
+            border-radius: 8px;
+            padding: 24px 28px;
+            max-width: 500px; width: 90%;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            position: relative;
+            font-family: "Helvetica Neue", sans-serif;
+        }
+        #disclaimer-modal-close {
+            position: absolute; top: 12px; right: 14px;
+            background: none; border: none;
+            font-size: 18px; cursor: pointer; color: #666; line-height: 1;
+            padding: 4px 6px; border-radius: 3px;
+        }
+        #disclaimer-modal-close:hover { color: #000; background: #f0f0f0; }
+        #disclaimer-modal-close:focus { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+        #disclaimer-modal-box h2 {
+            font-size: 0.95rem; color: var(--brand-navy);
+            margin: 0 0 12px; font-family: "Adobe Caslon Pro", serif;
+        }
+        #disclaimer-modal-box p { font-size: 0.8rem; color: #444; line-height: 1.6; margin: 0; }
+        #disclaimer-modal-box a { color: var(--brand-navy); font-weight: 600; }
+
+        /* =============================================================
+           RIGHT PANEL — decorative sunburst (aria-hidden)
+           Sighted/mouse users interact with it; AT ignores it entirely.
+           ============================================================= */
+        #chart-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--paper);
+            overflow: hidden;
+        }
+        path {
+            cursor: pointer;
+            transition: opacity 0.3s;
+            stroke: var(--paper);
+            stroke-width: 1px;
+        }
+        path:hover { opacity: 0.8; }
+        text.sunburst-label {
+            font-family: "Helvetica Neue", Helvetica, sans-serif;
+            font-size: 11px; fill: #fff;
+            pointer-events: none;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+            dominant-baseline: central;   /* centred across the slice, which labelFits assumes */
+        }
+        /* The text-shadow still paints when fill-opacity is 0 */
+        text.sunburst-label[fill-opacity="0"] {
+            visibility: hidden;
+        }
+        .center-text {
+            font-family: "Adobe Caslon Pro", serif;
+            fill: var(--brand-navy);
+            pointer-events: none;
+            text-anchor: middle;
+            font-weight: bold;
+        }
+        #bottom-label {
+            position: absolute;
+            bottom: 20px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.96);
+            border: 1px solid var(--brand-navy);
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            pointer-events: none;
+            text-align: center;
+            min-width: 220px; max-width: 70%;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+        #bottom-label .info-name {
+            display: block;
+            font-family: "Adobe Caslon Pro", serif;
+            font-size: 1.2rem; font-weight: bold;
+            color: var(--brand-navy); margin-bottom: 2px;
+        }
+        #bottom-label .info-title {
+            display: block;
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 0.8rem; text-transform: uppercase;
+            letter-spacing: 1px; color: #555; margin-bottom: 2px;
+        }
+        #bottom-label .info-dept {
+            display: block;
+            font-family: "Helvetica Neue", sans-serif;
+            font-size: 0.75rem; font-style: italic;
+            color: var(--brand-blue);
+        }
+        #tooltip {
+            position: fixed; opacity: 0;
+            background: rgba(0,38,73,0.9);
+            color: white; padding: 8px 12px;
+            border-radius: 4px;
+            font-family: sans-serif; font-size: 12px;
+            pointer-events: none; z-index: 50;
+            max-width: 200px; transition: opacity 0.2s;
+            text-align: center;
+        }
+        #tooltip strong { display: block; margin-bottom: 2px; color: var(--brand-blue); }
+
+
+        /* ---- Chart zoom controls (outside the aria-hidden chart) ---- */
+        #zoom-controls {
+            position: fixed; top: 10px; right: 14px; z-index: 15;
+            display: flex; align-items: center; gap: 4px;
+            font-family: "Helvetica Neue", sans-serif;
+        }
+        #zoom-controls[hidden] { display: none; }
+        #zoom-controls button {
+            min-width: 32px; height: 32px; padding: 0 10px; border-radius: 4px;
+            border: 1px solid var(--brand-navy);
+            background: white; color: var(--brand-navy);
+            font-size: 15px; line-height: 1; cursor: pointer;
+        }
+        #zoom-controls button#zoom-reset { font-size: 11px; }
+        #zoom-controls button:hover { background: #eef6f9; }
+        #zoom-controls button[aria-disabled="true"] { opacity: 0.45; cursor: default; background: white; }
+        #zoom-controls button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+        #zoom-level { min-width: 44px; text-align: center; font-size: 11px; color: var(--brand-navy); }
+        #zoom-hint {
+            position: fixed; top: 46px; right: 14px; z-index: 15;
+            margin: 0; padding: 3px 8px; border-radius: 4px;
+            background: rgba(255, 255, 255, 0.92); box-shadow: 0 0 0 1px #dde3e8;
+            font-family: "Helvetica Neue", sans-serif; font-size: 11px; color: #32475e;
+        }
+        #zoom-hint kbd { font-family: inherit; font-weight: 700; }
+        #zoom-hint[hidden] { display: none; }
+        /* ---- Tornado panel ---- */
+        #tornado-panel {
+            position: absolute; inset: 0; background: var(--paper);
+            overflow-y: auto; padding: 16px 24px; z-index: 20;
+        }
+        #tornado-toolbar {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 10px;
+        }
+        #return-to-chart {
+            padding: 7px 14px; border-radius: 4px;
+            background: var(--brand-navy); color: white;
+            border: none; font-family: "Helvetica Neue", sans-serif;
+            font-size: 12px; cursor: pointer; white-space: nowrap;
+        }
+        #return-to-chart:focus { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+        #tornado-title {
+            font-family: "Adobe Caslon Pro", serif; color: var(--brand-navy);
+            font-size: 1rem; margin: 0;
+        }
+        #tenure-table-wrap table {
+            width: 100%; border-collapse: collapse; margin-top: 0;
+            font-family: "Helvetica Neue", sans-serif; font-size: 12px;
+        }
+        #tenure-table-wrap th, #tenure-table-wrap td {
+            padding: 6px 10px; text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        #tenure-table-wrap th {
+            background: #f5f5f5; font-weight: 700; color: var(--brand-navy);
+        }
+        #tenure-table-wrap caption {
+            caption-side: top; text-align: left; padding: 0 0 6px;
+            font-family: "Helvetica Neue", sans-serif; font-size: 11px;
+            color: #002649; font-weight: 700;
+        }
+        /* ---- Tornado side-by-side layout ---- */
+        #tornado-body-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+        #tornado-chart-wrap {
+            flex: 0 0 auto;
+            min-width: 0;
+        }
+        #tenure-table-wrap {
+            flex: 1 1 240px;
+            min-width: 200px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        /* On narrow screens, stack vertically */
+        @media (max-width: 700px) {
+            #tornado-body-row {
+                flex-direction: column;
+            }
+            #tenure-table-wrap {
+                max-height: none;
+                width: 100%;
+            }
+        }
+        #tenure-table-wrap table {
+            margin-top: 0;
+        }
+        .t-bar { cursor: pointer; }
+        .t-bar:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+        .t-bar[aria-pressed="true"] > rect { stroke-width: 2px; }
+        .visually-hidden {
+            position: absolute;
+            width: 1px; height: 1px;
+            margin: -1px; padding: 0;
+            overflow: hidden; clip: rect(0,0,0,0); border: 0;
+        }
+
+        /* =============================================================
+           HIERARCHY EASTER EGG
+           ============================================================= */
+        #hierarchy-panel {
+            position: fixed; inset: 0; background: var(--paper);
+            z-index: 25; display: flex; flex-direction: column;
+        }
+        #hierarchy-panel[hidden] { display: none; }
+        #hierarchy-toolbar {
+            display: flex; align-items: center; gap: 14px;
+            padding: 10px 20px; border-bottom: 1px solid #ddd;
+            background: white; flex-shrink: 0;
+        }
+        #return-from-hierarchy {
+            padding: 7px 14px; border-radius: 4px;
+            background: var(--brand-navy); color: white;
+            border: none; font-family: "Helvetica Neue", sans-serif;
+            font-size: 12px; cursor: pointer; white-space: nowrap;
+        }
+        #return-from-hierarchy:focus { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+        #hierarchy-title {
+            font-family: "Adobe Caslon Pro", serif; color: var(--brand-navy);
+            font-size: 1rem; margin: 0;
+        }
+        #hierarchy-hint {
+            font-family: "Helvetica Neue", sans-serif; font-size: 11px;
+            color: #aaa; margin-left: auto;
+        }
+        #hierarchy-chart { flex: 1; overflow: hidden; position: relative; }
+        #hier-cut-overlay {
+            position: fixed; inset: 0; pointer-events: none; z-index: 26;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #hier-cut-overlay[hidden] { display: none; }   /* display:flex would override [hidden] */
+        #hier-cut-line {
+            height: 2px; background: white;
+            box-shadow: 0 0 8px 2px rgba(255,255,255,0.9);
+            width: 0; transition: width 0.25s ease-out;
+        }
+    </style>
+</head>
+<body>
+
+<!-- =================================================================
+     PRIMARY ACCESSIBLE INTERFACE
+     Screen readers navigate entirely within this panel.
+     The sunburst is decorative and completely hidden from AT.
+     ================================================================= -->
+<a href="#tree-root" class="visually-hidden skip-link">Skip to organization tree</a>
+<aside id="tree-panel" aria-label="Organization Explorer">
+    <div id="tree-header">
+        <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100'> <g fill='none' stroke='%23002649' stroke-width='5' stroke-linejoin='round'> <path d='M60 22 C48 14 30 14 18 18 V62 C30 58 48 58 60 66 Z'/> <path d='M60 22 C72 14 90 14 102 18 V62 C90 58 72 58 60 66 Z'/></g> <text x='60' y='92' text-anchor='middle' font-family='Helvetica Neue, Arial, sans-serif' font-size='17' font-weight='700' letter-spacing='2' fill='%23002649'>EXAMPLE</text></svg>"
+             alt="Example Publishing Co."
+             style="display:block; width:120px; height:auto; margin:0 0 6px;"
+             id="panel-logo" />
+        <button id="disclaimer-btn" type="button" aria-haspopup="dialog">ⓘ Synthetic Data — About</button>
+        <h1 class="visually-hidden">Example Publishing Co. — Organization Chart</h1>
+        <p id="tree-status" role="status">Loading…</p>
+        <p id="fallback-banner" role="note" hidden>Showing sample data — org_data.csv not found</p>
+    </div>
+
+    <div id="tree-search">
+        <label for="tree-search-input">Search employees</label>
+        <input type="text" id="tree-search-input"
+               placeholder="Name, title, or department…"
+               autocomplete="off"
+               aria-describedby="search-hint" />
+        <span id="search-hint" class="visually-hidden">
+            Type to filter the organization hierarchy below.
+            Use arrow keys to navigate, Enter or Space to select.
+            Plus and minus magnify the chart around the focused person; 0 resets.
+        </span>
+        <!-- Announced when search result count changes -->
+        <div id="search-status"
+             role="status" aria-live="polite" aria-atomic="true"
+             class="visually-hidden"></div>
+    </div>
+
+    <!--
+        WAI-ARIA tree widget.
+        Keyboard contract (ARIA Authoring Practices §3.25):
+          Arrow Down / Up   — move focus to next/previous visible item
+          Arrow Right       — expand collapsed node; or enter first child
+          Arrow Left        — collapse expanded node; or move to parent
+          Home / End        — first / last visible item
+          Enter / Space     — activate (select + zoom sunburst)
+          + / -             — magnify / shrink the chart around the focused item
+          0                 — reset magnification
+    -->
+    <div id="tree-scroll">
+        <ul id="tree-root" role="tree" aria-label="Organization hierarchy"></ul>
+    </div>
+
+    <!--
+        Detail region: visible for sighted keyboard users,
+        and announced as an aria-live region for screen readers
+        whenever the selected item changes.
+    -->
+    <div id="detail-panel" class="empty"
+         role="region" aria-label="Selected employee details"
+         aria-live="polite" aria-atomic="true">
+        <div class="detail-name"></div>
+        <div class="detail-title"></div>
+        <div class="detail-dept"></div>
+        <div class="detail-reports"></div>
+    </div>
+</aside>
+
+<!-- =================================================================
+     DECORATIVE SUNBURST
+     aria-hidden="true" — completely invisible to assistive technology.
+     Sighted / mouse users can click to zoom; it mirrors tree selection.
+     ================================================================= -->
+
+<div id="tornado-panel" hidden
+     role="region" aria-labelledby="tornado-title">
+    <div id="tornado-toolbar">
+        <button id="return-to-chart" type="button">&#8592; Back to org chart</button>
+        <h2 id="tornado-title">Employee Tenure</h2>
+    </div>
+    <p style="font-size:11px;color:#002649;font-family:sans-serif;margin:0 0 10px 0;">
+        Right (teal): current employees &middot;
+        Left (gray): former employees &middot;
+        Each row = 1 year of tenure &middot;
+        Click or press Enter on a bar to see names.
+    </p>
+    <div id="tornado-controls-row">
+        <div id="tornado-search-wrap">
+            <label for="tornado-search">Filter employees by name</label>
+            <input type="text" id="tornado-search" placeholder="Type a name…" autocomplete="off" />
+            <span id="tornado-search-status" role="status" aria-live="polite"></span>
+        </div>
+        <div id="tornado-bucket-wrap">
+            <label for="tornado-bucket" style="display:block;font-size:11px;font-weight:700;color:#002649;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Bucket size (years per bar)</label>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:11px;color:#475b70;">1 yr</span>
+                <input type="range" id="tornado-bucket" min="1" max="10" value="5" step="1"
+                       style="flex:1;accent-color:#002649;"
+                       aria-label="Bucket size in years" aria-valuemin="1" aria-valuemax="10" aria-valuenow="5" />
+                <span style="font-size:11px;color:#475b70;">10 yrs</span>
+                <span id="tornado-bucket-label" style="font-size:12px;font-weight:700;color:#002649;min-width:48px;">5 years</span>
+            </div>
+        </div>
+    </div>
+    <div id="tornado-body-row">
+        <div id="tornado-chart-wrap" role="img" aria-label="Tornado chart showing employee tenure distribution"></div>
+        <div id="tenure-table-wrap" role="region" aria-label="Selected employees" tabindex="-1"></div>
+    </div>
+    <div id="tenure-announce" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+</div>
+
+<div id="chart-container" aria-hidden="true">
+    <div id="bottom-label">
+        <span class="info-name"></span>
+        <span class="info-title"></span>
+        <span class="info-dept"></span>
+    </div>
+</div>
+
+<!-- Chart magnification. A real control group outside the aria-hidden chart,
+     so keyboard and switch users can zoom too. Zoom centres on the person
+     focused in the tree (or the chart centre). -->
+<div id="zoom-controls" role="group" aria-label="Chart zoom">
+    <button id="zoom-out" type="button" aria-label="Zoom out" aria-disabled="true">&minus;</button>
+    <span id="zoom-level" aria-hidden="true">100%</span>
+    <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+    <button id="zoom-reset" type="button" aria-label="Reset zoom" aria-disabled="true">Reset</button>
+</div>
+<p id="zoom-hint">Scroll to expand the branch under the pointer &middot; drag to pan &middot; <kbd>+</kbd>/<kbd>&minus;</kbd> in the list</p>
+<div id="zoom-announce" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Tooltip is also decorative -->
+<div id="tooltip" aria-hidden="true"></div>
+
+<div id="disclaimer-modal" role="dialog" aria-modal="true" aria-labelledby="disclaimer-modal-title" hidden>
+    <div id="disclaimer-modal-box">
+        <button id="disclaimer-modal-close" aria-label="Close disclaimer">&#x2715;</button>
+        <h2 id="disclaimer-modal-title">Synthetic Data — About</h2>
+        <p>Everyone in this chart is fictional. Example Publishing Co., its people, titles, reporting lines and tenure dates are synthetic data generated by <code>make_dashboard_data.py</code>; any resemblance to real people is coincidence.</p>
+        <p style="margin-top:10px;">The chart is a demonstration of an accessible, keyboard-operable org chart.</p>
+    </div>
+</div>
+
+<div id="hier-cut-overlay" hidden>
+    <div id="hier-cut-line"></div>
+</div>
+
+<div id="hierarchy-panel" hidden>
+    <div id="hierarchy-toolbar">
+        <button id="return-from-hierarchy" type="button">&#8592; Back to org chart</button>
+        <h2 id="hierarchy-title">Organization Hierarchy</h2>
+        <span id="hierarchy-hint">Scroll to zoom · Drag to pan · Click a node to expand/collapse</span>
+    </div>
+    <div id="hierarchy-chart"></div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="tenure_data.js"></script>
+<script>
+const LOGO_SRC = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100'> <g fill='none' stroke='%23002649' stroke-width='5' stroke-linejoin='round'> <path d='M60 22 C48 14 30 14 18 18 V62 C30 58 48 58 60 66 Z'/> <path d='M60 22 C72 14 90 14 102 18 V62 C90 58 72 58 60 66 Z'/></g> <text x='60' y='92' text-anchor='middle' font-family='Helvetica Neue, Arial, sans-serif' font-size='17' font-weight='700' letter-spacing='2' fill='%23002649'>EXAMPLE</text></svg>";
+// Fictional sample org (Meridian House Publishing), used only when org_data.csv can't be loaded.
+const fallbackCsvData = `node_id,manager_id,name,title,department
+s-001,,Eleanor Whitfield,President & Publisher,Executive
+s-002,s-001,Marcus Chen,VP Editorial,Editorial
+s-003,s-001,Priya Raman,VP Marketing & Sales,Marketing
+s-004,s-001,Daniel Okafor,VP Production,Production
+s-005,s-001,Sofia Alvarez,Chief Financial Officer,Finance
+s-006,s-002,Hannah Brooks,Executive Editor,Editorial
+s-007,s-002,Tomás Ferreira,Managing Editor,Editorial
+s-008,s-006,Liam O'Connor,Senior Editor,Editorial
+s-009,s-006,Grace Nakamura,Associate Editor,Editorial
+s-010,s-003,Victor Haddad,Director of Publicity,Marketing
+s-011,s-003,Amara Obi,Sales Director,Sales
+s-012,s-010,Julia Berg,Publicist,Marketing
+s-013,s-004,Ravi Patel,Production Manager,Production
+s-014,s-013,Chloe Dubois,Art Director,Design
+s-015,s-013,Ben Larsen,Production Editor,Production
+s-016,s-005,Nora Kim,Controller,Finance`;
+
+// =================================================================
+// GLOBALS
+// =================================================================
+let sbColorScale;
+let root, arc, path, label, tooltipSel, container, width, height, radius, svg;
+let currentSbNode;
+
+const SLICE_SIZE_FACTOR = 4;
+const MAX_DEPTH_VISIBLE  = 6;
+const CHAR_WIDTH_PX      = 7;
+const BRAND_NAVY = "#002649";
+const BRAND_BLUE = "#7cc9de";
+
+// id → d3 hierarchy node
+const sunburstNodeMap = new Map();
+
+// =================================================================
+// MAGNIFICATION (wheel / pinch / keyboard)
+// Layered on top of the click-to-focus zoom:
+//   k        — radial scale (rings grow, text stays 11px)
+//   x, y     — pan of the chart centre, in SVG units
+//   phi/psi  — fisheye focus: data angle phi is drawn at screen angle psi,
+//              and slices near it are widened in proportion to k.
+// The wheel keeps whatever is under the pointer fixed; keyboard zoom centres
+// on the person focused in the tree.
+// =================================================================
+const ZOOM_MAX          = 16;
+const FISHEYE_PER_ZOOM  = 0.6;   // angular magnification added per unit of zoom
+const TAU               = 2 * Math.PI;
+const view = { k: 1, x: 0, y: 0, phi: 0, psi: 0, rs: 1 };   // rs: ring stretch, see ringStretchFor
+let zoomBehavior = null, sbG = null, viewAnim = null, viewAnimTarget = null;
+let _viewLocked = false;          // true while a click-zoom transition runs
+let _viewTxToken = 0;             // identifies the latest click-zoom transition
+let _pendingZoom = null;          // keyboard zoom pressed during a click-zoom
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+function fisheyeD(k) { return FISHEYE_PER_ZOOM * Math.max(0, k - 1); }
+function wrapPi(a) { a = (a + Math.PI) % TAU; if (a < 0) a += TAU; return a - Math.PI; }
+// Sarkar-Brown fisheye on [-pi, pi]; extended periodically so an arc that
+// crosses the seam opposite the focus stays contiguous.
+function fisheye(u, d) {
+    if (d <= 0) return u;
+    const n = Math.floor((u + Math.PI) / TAU);
+    const v = u - n * TAU;
+    const x = Math.abs(v) / Math.PI;
+    return n * TAU + Math.sign(v) * Math.PI * ((d + 1) * x / (d * x + 1));
+}
+function fisheyeInv(g, d) {
+    if (d <= 0) return g;
+    const y = Math.abs(g) / Math.PI;
+    return Math.sign(g) * Math.PI * (y / (d + 1 - d * y));
+}
+function ringPx() { return radius * view.k / SLICE_SIZE_FACTOR; }
+// Layout depth y -> screen radius. The centre circle (y <= 1) keeps its size;
+// the rings outside it are stretched by view.rs so a shallow branch still
+// reaches the full chart radius.
+function rPx(y, k = view.k) {
+    const c = radius * k / SLICE_SIZE_FACTOR;
+    return c * (y <= 1 ? y : 1 + (y - 1) * view.rs);
+}
+function rInv(r) {
+    const u = r / ringPx();
+    return u <= 1 ? u : 1 + (u - 1) / view.rs;
+}
+// Stretch that makes p's deepest visible ring end where ring MAX_DEPTH_VISIBLE does.
+function ringStretchFor(p) {
+    const n = Math.min(p.height, MAX_DEPTH_VISIBLE - 1);   // rings drawn outside the centre
+    return n > 0 ? (MAX_DEPTH_VISIBLE - 1) / n : 1;
+}
+// Zooming in reveals the rings that are cut off at the default size.
+function depthLimit() { return MAX_DEPTH_VISIBLE + Math.max(0, Math.min(2, Math.floor(Math.log2(view.k)))); }
+// Screen geometry for a node's (data-space) layout box.
+function geom(c, data) {
+    const d  = fisheyeD(view.k);
+    const u0 = wrapPi(c.x0 - view.phi);
+    return {
+        x0: view.psi + fisheye(u0, d),
+        x1: view.psi + fisheye(u0 + (c.x1 - c.x0), d),
+        y0: c.y0, y1: c.y1, data
+    };
+}
+function arcFor(d, c) { return arc(geom(c || d.current, d.data)); }
+function arcOpacity(c) { return arcVisible(c) ? 1 : 0; }
+// Thin slices get a thinner separator so their colour isn't eaten by it.
+function strokeFor(d) {
+    const g = geom(d.current, d.data);
+    const w = (g.x1 - g.x0) * rPx(g.y0);
+    return Math.max(0, Math.min(1, w * 0.12)) + "px";
+}
+
+// Roving tabindex: the single li[role="treeitem"] that currently owns tabindex=0
+let rovingFocusEl = null;
+
+// Currently selected node id
+let selectedId = null;
+
+// True while a tree activation is propagating to the sunburst,
+// so the sunburst's sync-back to the tree is skipped.
+let _suppressSync = false;
+
+// =================================================================
+// INIT
+// =================================================================
+async function initApp() {
+    const status = document.getElementById("tree-status");
+    const banner = document.getElementById("fallback-banner");
+    try {
+        let data;
+        let usingFallback = false;
+        try {
+            data = await d3.csv("./org_data.csv", { cache: "no-store" });
+        } catch (fetchErr) {
+            console.warn("Could not load org_data.csv; using fallback data", fetchErr);
+            data = d3.csvParse(fallbackCsvData);
+            usingFallback = true;
+        }
+        banner.hidden = !usingFallback;
+        const required = ["node_id", "manager_id", "name", "title", "department"];
+        if (!data.length || !required.every(k => data.columns.includes(k)))
+            throw new Error("Invalid CSV schema");
+        const byId = new Map(data.map(r => [r.node_id, r]));
+        if (byId.size !== data.length || byId.has("p-ROOT"))
+            throw new Error("Duplicate or reserved ID");
+        for (const row of data) {
+            if (!row.node_id || !row.name) throw new Error("Missing identity");
+            const visited = new Set();
+            let node = row;
+            while (node) {
+                if (visited.has(node.node_id)) throw new Error("Cycle in reporting relationships");
+                visited.add(node.node_id);
+                if (!node.manager_id) break;
+                if (!byId.has(node.manager_id)) throw new Error("Unresolved manager");
+                node = byId.get(node.manager_id);
+            }
+        }
+        processAndRender(data, usingFallback ? "Meridian House Publishing" : undefined,
+                         usingFallback ? "Sample Organization" : undefined);
+        status.textContent = usingFallback
+            ? `${data.length} employees · sample data`
+            : `${data.length} employees`;
+    } catch (err) {
+        console.error(err);
+        status.setAttribute("role", "alert");
+        status.textContent = "Data error: " + err.message;
+    }
+}
+
+// =================================================================
+// DATA
+// =================================================================
+function buildOrgData(parsedData, rootName = "Example Publishing Co.", rootTitle = "Independent Publisher") {
+    const dataMap = new Map();
+    const manualRoot = {
+        id: "p-ROOT",
+        name: rootName,
+        title: "",
+        department: "",
+        children: []
+    };
+    dataMap.set("p-ROOT", manualRoot);
+
+    parsedData.forEach(row => {
+        if (!row.node_id) return;
+        dataMap.set(row.node_id, {
+            id:         row.node_id,
+            name:       row.name || row.position_full_name || "",
+            title:      row.title || "",
+            department: row.department || row.group_name || "",
+            parentId:   row.manager_id || row.node_manager_id || "",
+            children:   []
+        });
+    });
+
+    parsedData.forEach(row => {
+        if (!row.node_id) return;
+        const node   = dataMap.get(row.node_id);
+        const parent = row.manager_id
+            ? (dataMap.get(row.manager_id) || manualRoot)
+            : manualRoot;
+        node.parent = parent;
+        parent.children.push(node);
+    });
+
+    resolveGenericDepartments(manualRoot);
+
+    // Drop the temporary parent links: d3.hierarchy and the renderers don't need them
+    // and they would create circular references in the data objects.
+    dataMap.forEach(n => { delete n.parent; });
+
+    return manualRoot;
+}
+
+const LEADER_RE = /director|vp|vice president|chief|president|c[- ]?suite|coo|cfo|cto|cpo/i;
+function isLeader(title) {
+    if (!title) return false;
+    // VP and above always qualify, even if title also contains 'Associate Director'
+    if (/\b(vice\s+president|chief|president|coo|cfo|cto|cpo)\b/i.test(title)) return true;
+    // Exclude associate directors and coordinators
+    if (/associate\s+director/i.test(title)) return false;
+    if (/coordinator/i.test(title)) return false;
+    // Plain directors qualify
+    return /\bdirector\b/i.test(title);
+}
+
+const GENERIC_DEPT_RE = /^(IT|Production|Art|Design|Copy|Trade)\s*\([^)]+\)$/i;
+function resolveGenericDepartments(rootNode) {
+    const stack = [rootNode];
+    while (stack.length) {
+        const node = stack.pop();
+        if (GENERIC_DEPT_RE.test(node.department || "")) {
+            let anc = node.parent;
+            while (anc && !isLeader(anc.title)) anc = anc.parent;
+            if (anc) node.department = anc.title;
+        }
+        node.children.forEach(c => stack.push(c));
+    }
+}
+
+function processAndRender(parsedData, rootName, rootTitle) {
+    const orgData = buildOrgData(parsedData, rootName, rootTitle);
+    renderSunburst(orgData);
+    renderTree(orgData);
+}
+
+// =================================================================
+// TREE — WAI-ARIA tree widget
+// =================================================================
+function renderTree(orgData) {
+    const treeRoot = document.getElementById("tree-root");
+    treeRoot.innerHTML = "";
+
+    // Top-level items are the direct children of the org root
+    orgData.children.forEach((child, i) => {
+        treeRoot.appendChild(
+            makeTreeItem(child, 1, orgData.children.length, i + 1)
+        );
+    });
+
+    // Roving tabindex: start on the first item
+    const first = treeRoot.querySelector('[role="treeitem"]');
+    if (first) {
+        first.tabIndex = 0;
+        rovingFocusEl = first;
+    }
+
+    // Keyboard handling — event delegation on the tree root
+    treeRoot.addEventListener("keydown", onTreeKeydown);
+
+    // Search
+    document.getElementById("tree-search-input").addEventListener("input", function () {
+        filterTree(this.value.trim().toLowerCase());
+    });
+}
+
+/**
+ * Build one li[role="treeitem"] with its optional ul[role="group"] of children.
+ * aria-level / aria-setsize / aria-posinset give screen readers position context.
+ */
+function makeTreeItem(nodeData, level, setSize, posInSet) {
+    const hasChildren = !!(nodeData.children && nodeData.children.length > 0);
+    const childCount  = hasChildren ? nodeData.children.length : 0;
+
+    const li = document.createElement("li");
+    li.setAttribute("role",        "treeitem");
+    li.setAttribute("tabindex",    "-1");
+    li.setAttribute("aria-level",  level);
+    li.setAttribute("aria-setsize",setSize);
+    li.setAttribute("aria-posinset",posInSet);
+    li.setAttribute("aria-selected","false");
+    li.dataset.nodeId = nodeData.id;
+
+    if (hasChildren) li.setAttribute("aria-expanded", "false");
+
+    // Computed label — aria-expanded state is announced separately by browsers
+    const labelParts = [nodeData.name, nodeData.title, nodeData.department].filter(Boolean);
+    if (hasChildren)
+        labelParts.push(`${childCount} direct report${childCount !== 1 ? "s" : ""}`);
+    li.setAttribute("aria-label", labelParts.join(", "));
+
+    // ---- Visual row (presentational) ----
+    const row = document.createElement("div");
+    row.className = "tree-row";
+    row.style.paddingLeft = `${4 + (level - 1) * 14}px`;
+
+    const toggle = document.createElement("span");
+    toggle.className   = hasChildren ? "tree-toggle has-children" : "tree-toggle";
+    toggle.textContent = hasChildren ? "▶" : "·";
+    toggle.setAttribute("aria-hidden", "true");
+    row.appendChild(toggle);
+
+    const content  = document.createElement("div");
+    content.className = "item-content";
+
+    const nameEl = document.createElement("div");
+    nameEl.className   = "item-name";
+    nameEl.textContent = nodeData.name;
+    content.appendChild(nameEl);
+
+    const metaStr = [nodeData.title, nodeData.department].filter(Boolean).join(" · ");
+    if (metaStr) {
+        const metaEl = document.createElement("div");
+        metaEl.className   = "item-meta";
+        metaEl.textContent = metaStr;
+        content.appendChild(metaEl);
+    }
+
+    row.appendChild(content);
+    li.appendChild(row);
+
+    // ---- Children group ----
+    if (hasChildren) {
+        const group = document.createElement("ul");
+        group.setAttribute("role", "group");
+        nodeData.children.forEach((child, i) => {
+            group.appendChild(makeTreeItem(child, level + 1, childCount, i + 1));
+        });
+        li.appendChild(group);
+    }
+
+    // Click row → focus + activate
+    li.addEventListener("click", e => {
+        e.stopPropagation();
+        rovingMoveTo(li);
+        activateItem(li);
+    });
+
+    // Click toggle icon specifically → expand/collapse without activating
+    if (hasChildren) {
+        toggle.addEventListener("click", e => {
+            e.stopPropagation();
+            rovingMoveTo(li);
+            toggleExpand(li);
+        });
+    }
+
+    return li;
+}
+
+// =================================================================
+// ROVING TABINDEX
+// =================================================================
+function rovingMoveTo(el) {
+    if (rovingFocusEl && rovingFocusEl !== el) rovingFocusEl.tabIndex = -1;
+    el.tabIndex = 0;
+    el.focus({ preventScroll: false });
+    rovingFocusEl = el;
+    followTreeFocus(el);
+}
+
+/** All li[role="treeitem"] elements currently visible (not display:none, not search-hidden). */
+function visibleItems() {
+    return Array.from(
+        document.querySelectorAll('#tree-root [role="treeitem"]')
+    ).filter(el => !el.classList.contains("search-hidden") && el.offsetParent !== null);
+}
+
+// =================================================================
+// KEYBOARD — WAI-ARIA tree pattern (§3.25 Authoring Practices)
+// =================================================================
+function onTreeKeydown(e) {
+    const item = e.target.closest('[role="treeitem"]');
+    if (!item) return;
+
+    const items = visibleItems();
+    const idx   = items.indexOf(item);
+
+    switch (e.key) {
+        case "ArrowDown":
+            e.preventDefault();
+            if (idx < items.length - 1) rovingMoveTo(items[idx + 1]);
+            break;
+
+        case "ArrowUp":
+            e.preventDefault();
+            if (idx > 0) rovingMoveTo(items[idx - 1]);
+            break;
+
+        case "ArrowRight":
+            e.preventDefault();
+            if (item.getAttribute("aria-expanded") === "false") {
+                // Expand
+                toggleExpand(item, true);
+            } else if (item.getAttribute("aria-expanded") === "true") {
+                // Enter: move to first child
+                const firstChild = item.querySelector(
+                    ':scope > ul[role="group"] > [role="treeitem"]:not(.search-hidden)'
+                );
+                if (firstChild) rovingMoveTo(firstChild);
+            }
+            // Leaf: no-op
+            break;
+
+        case "ArrowLeft":
+            e.preventDefault();
+            if (item.getAttribute("aria-expanded") === "true") {
+                // Collapse
+                toggleExpand(item, false);
+            } else {
+                // Move to parent treeitem
+                const parent = item.parentElement.closest('[role="treeitem"]');
+                if (parent) rovingMoveTo(parent);
+            }
+            break;
+
+        case "Home":
+            e.preventDefault();
+            if (items.length) rovingMoveTo(items[0]);
+            break;
+
+        case "End":
+            e.preventDefault();
+            if (items.length) rovingMoveTo(items[items.length - 1]);
+            break;
+
+        case "Enter":
+        case " ":
+            e.preventDefault();
+            activateItem(item);
+            break;
+
+        case "+":
+        case "=":
+            e.preventDefault();
+            zoomStep(1);
+            break;
+
+        case "-":
+        case "_":
+            e.preventDefault();
+            zoomStep(-1);
+            break;
+
+        case "0":
+            e.preventDefault();
+            zoomStep(0);
+            break;
+    }
+}
+
+// =================================================================
+// EXPAND / COLLAPSE
+// =================================================================
+function toggleExpand(li, force) {
+    if (!li.hasAttribute("aria-expanded")) return; // leaf
+    const wasOpen = li.getAttribute("aria-expanded") === "true";
+    const open    = force !== undefined ? force : !wasOpen;
+    li.setAttribute("aria-expanded", String(open));
+    const toggle = li.querySelector(":scope > .tree-row .tree-toggle");
+    if (toggle) toggle.textContent = open ? "▼" : "▶";
+}
+
+/** Expand every ancestor so a node is reachable by keyboard. */
+function expandAncestors(li) {
+    let parent = li.parentElement.closest('[role="treeitem"]');
+    while (parent) {
+        if (parent.getAttribute("aria-expanded") === "false") toggleExpand(parent, true);
+        parent = parent.parentElement.closest('[role="treeitem"]');
+    }
+}
+
+// =================================================================
+// ACTIVATION — select, announce, zoom sunburst
+// =================================================================
+function activateItem(li) {
+    // Clear previous selection
+    if (selectedId) {
+        const prev = document.querySelector(`[data-node-id="${selectedId}"]`);
+        if (prev) prev.setAttribute("aria-selected", "false");
+    }
+    li.setAttribute("aria-selected", "true");
+    selectedId = li.dataset.nodeId;
+
+    // Update the live-region detail panel (announces to screen readers)
+    updateDetailPanel(li.dataset.nodeId);
+
+    // Mirror on the decorative sunburst
+    _suppressSync = true;
+    const sbNode = sunburstNodeMap.get(li.dataset.nodeId);
+    if (sbNode) zoomSunburst(null, sbNode);
+    _suppressSync = false;
+}
+
+/**
+ * Called when the sighted user clicks the sunburst.
+ * Updates tree selection visually without moving keyboard focus.
+ */
+function syncTreeFromSunburst(nodeId) {
+    if (selectedId) {
+        const prev = document.querySelector(`[data-node-id="${selectedId}"]`);
+        if (prev) prev.setAttribute("aria-selected", "false");
+    }
+    selectedId = nodeId;
+
+    const li = document.querySelector(`[data-node-id="${nodeId}"]`);
+    if (!li) return;
+    li.setAttribute("aria-selected", "true");
+    expandAncestors(li);
+    li.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    updateDetailPanel(nodeId);
+    // Do NOT move keyboard focus — user is working with the mouse
+}
+
+// =================================================================
+// DETAIL PANEL (visible + aria-live)
+// =================================================================
+function updateDetailPanel(nodeId) {
+    const panel  = document.getElementById("detail-panel");
+    const sbNode = sunburstNodeMap.get(nodeId);
+    if (!sbNode) { panel.classList.add("empty"); return; }
+    panel.classList.remove("empty");
+    const d = sbNode.data;
+    panel.querySelector(".detail-name").textContent   = d.name;
+    panel.querySelector(".detail-title").textContent  = d.title || "";
+    panel.querySelector(".detail-dept").textContent   = d.department || "";
+    const c = sbNode.children ? sbNode.children.length : 0;
+    panel.querySelector(".detail-reports").textContent = c
+        ? `${c} direct report${c !== 1 ? "s" : ""}`
+        : "Individual contributor";
+}
+
+// =================================================================
+// SEARCH
+// =================================================================
+function filterTree(query) {
+    // Easter egg: "years" shows tenure tornado
+    const tornadoPanel = document.getElementById('tornado-panel');
+    if (query === 'years') { showTornado(); return; }
+    // Easter egg: "hierarchy" shows tree view
+    if (query === 'hierarchy') { showHierarchy(); return; }
+    // If tornado is open and user typed something else, close it
+    if (tornadoPanel && !tornadoPanel.hidden) { hideTornado(); }
+    const allItems = document.querySelectorAll('#tree-root [role="treeitem"]');
+    // Reset everything
+    allItems.forEach(li => li.classList.remove("search-match", "search-hidden"));
+
+    if (!query) {
+        document.getElementById("search-status").textContent = "";
+        return;
+    }
+
+    const matchIds   = new Set();
+    const ancestorIds = new Set();
+
+    allItems.forEach(li => {
+        const sbNode = sunburstNodeMap.get(li.dataset.nodeId);
+        if (!sbNode) return;
+        const d   = sbNode.data;
+        const hit = d.name.toLowerCase().includes(query)
+                 || (d.title      || "").toLowerCase().includes(query)
+                 || (d.department || "").toLowerCase().includes(query);
+        if (hit) {
+            matchIds.add(li.dataset.nodeId);
+            sbNode.ancestors().forEach(a => { if (a.data.id) ancestorIds.add(a.data.id); });
+        }
+    });
+
+    const visibleIds = new Set([...matchIds, ...ancestorIds]);
+
+    allItems.forEach(li => {
+        const id = li.dataset.nodeId;
+        // Items not in the sunburst map were never evaluated: leave them untouched
+        if (!sunburstNodeMap.has(id)) return;
+        if (!visibleIds.has(id)) {
+            li.classList.add("search-hidden");
+        } else {
+            if (matchIds.has(id)) li.classList.add("search-match");
+            // Auto-expand ancestors that have descendant matches
+            if (ancestorIds.has(id) && !matchIds.has(id)) toggleExpand(li, true);
+        }
+    });
+
+    const count = matchIds.size;
+    document.getElementById("search-status").textContent =
+        count ? `${count} result${count !== 1 ? "s" : ""} found` : "No results found";
+
+    // Update roving tabindex to first match WITHOUT stealing focus — user is still typing.
+    // Focus stays in the search input; Tab will land on the first result.
+    const firstMatch = document.querySelector('[role="treeitem"].search-match');
+    if (firstMatch && rovingFocusEl !== firstMatch) {
+        if (rovingFocusEl) rovingFocusEl.tabIndex = -1;
+        firstMatch.tabIndex = 0;
+        rovingFocusEl = firstMatch;
+        // Do NOT call .focus()
+    }
+}
+
+// =================================================================
+// SUNBURST — decorative, aria-hidden
+// SVG elements have no role, tabindex, or aria attributes.
+// =================================================================
+// Each person counts for one unit of their own slice, so d3.partition packs
+// their team against the slice's start and leaves the spare unit as a gap at
+// the end. Shift each team (and everything under it) so the team is centred
+// in its parent's slice, with the gap split evenly on both sides.
+function centreChildren(rootNode) {
+    rootNode.eachBefore(n => {
+        if (!n.children || !n.children.length) return;
+        const first = n.children[0], last = n.children[n.children.length - 1];
+        const off = ((n.x0 + n.x1) - (first.x0 + last.x1)) / 2;
+        if (Math.abs(off) < 1e-12) return;
+        n.children.forEach(c => c.each(d => { d.x0 += off; d.x1 += off; }));
+    });
+}
+
+function renderSunburst(orgData, weightFn) {
+    weightFn = weightFn || (d => d.id === "p-ROOT" ? 0 : 1);
+    container  = document.getElementById("chart-container");
+    tooltipSel = d3.select("#tooltip");
+    width  = container.clientWidth;
+    height = container.clientHeight;
+    // The outermost visible ring extends MAX_DEPTH_VISIBLE * radius / SLICE_SIZE_FACTOR
+    // = 6/4 = 1.5× radius from center, so actual chart diameter is 3× radius.
+    // Divide by 3 so the chart fits within the SVG with ~40px breathing room each side.
+    radius = Math.min(width, height - 160) / 3;
+
+    const colorScale = d3.scaleSequential()
+        .range(['#243547', '#196263', '#7cc9de']);
+
+    const hierarchy = d3.hierarchy(orgData)
+        .sum(d => weightFn(d))
+        .sort((a, b) => b.value - a.value);
+
+    root = d3.partition()
+        .size([2 * Math.PI, hierarchy.height + 1])(hierarchy);
+    centreChildren(root);
+
+    root.each(d => d.current = d);
+    currentSbNode = root;
+    colorScale.domain([root.height, 0]);
+    sbColorScale = colorScale;
+
+    d3.selectAll("#chart-container svg").remove();
+    svg = d3.select("#chart-container").append("svg")
+        .attr("viewBox", [-width / 2, -height / 2, width, height])
+        .attr("width",  width)
+        .attr("height", height)
+        .style("font", "12px sans-serif");
+    svg.selectAll('text.stray').remove();
+
+    arc = d3.arc()
+        .startAngle(d => d.x0)
+        .endAngle(d => d.x1)
+        .padAngle(d => Math.min((d.x1 - d.x0) * 0.15, 0.005))
+        .padRadius(radius * 1.5)
+        .innerRadius(d => rPx(d.y0))
+        .outerRadius(d => Math.max(rPx(d.y0), rPx(d.y1) - 1));
+
+    Object.assign(view, { k: 1, x: 0, y: 0, phi: 0, psi: 0, rs: 1 });
+    // Everything that pans with the chart lives in sbG
+    sbG = svg.append("g").attr("class", "sb-view");
+
+    // Slices — no role, no tabindex, no aria-label (container is aria-hidden)
+    const pathG = sbG.append("g");
+    path = pathG
+        .selectAll("path")
+        .data(root.descendants().slice(1))
+        .join("path")
+        .attr("fill",         d => colorScale(d.depth))
+        .attr("fill-opacity", d => arcOpacity(d.current))
+        .attr("pointer-events", d => arcVisible(d.current) ? "auto" : "none")
+        .attr("d", d => arcFor(d))
+        .style("stroke-width", d => strokeFor(d))
+        .on("click",     zoomSunburst)
+        .on("mouseover", showTooltip);
+    // mouseleave on the group avoids the mouseout/mouseover race when moving between slices
+    pathG.on("mouseleave", hideTooltip);
+
+    label = sbG.append("g")
+        .attr("pointer-events", "none")
+        .attr("text-anchor",    "middle")
+        .style("user-select",   "none")
+        .selectAll("text")
+        .data(root.descendants().slice(1))
+        .join("text")
+        .attr("class", "sunburst-label")
+        .attr("fill-opacity", d => +labelVisible(d.current))
+        .attr("transform",    d => labelTransform(geom(d.current, d.data)))
+        .each(function(d) { setLabelTspans(this, getLabelLines(geom(d.current, d.data))); });
+
+    // Center "zoom out" circle — keyboard users zoom out via the tree (Left arrow / parent)
+    sbG.append("circle")
+        .datum(root)
+        .attr("r",      radius / SLICE_SIZE_FACTOR)
+        .attr("fill",   "#fff")
+        .attr("stroke", "#ccc")
+        .attr("pointer-events", "all")
+        .attr("cursor", "pointer")
+        .on("click", zoomSunburst);
+
+    sbG.append("image")
+        .attr("class", "center-logo")
+        .attr("href", LOGO_SRC)
+        .attr("x", -48).attr("y", -24)
+        .attr("width", 96).attr("height", 48)
+        .attr("pointer-events", "none");
+
+    // Two-line name — hidden at root, animated in on zoom
+    sbG.append("text")
+        .attr("class", "center-name-line1")
+        .attr("pointer-events", "none")
+        .attr("text-anchor", "middle")
+        .attr("fill", "#002649")
+        .style("font-size", "0.72rem")
+        .style("font-family", '"Helvetica Neue", sans-serif')
+        .style("font-weight", "600")
+        .attr("opacity", 0)
+        .text("");
+
+    sbG.append("text")
+        .attr("class", "center-name-line2")
+        .attr("pointer-events", "none")
+        .attr("text-anchor", "middle")
+        .attr("fill", "#002649")
+        .style("font-size", "0.72rem")
+        .style("font-family", '"Helvetica Neue", sans-serif')
+        .style("font-weight", "600")
+        .attr("opacity", 0)
+        .text("");
+
+    // center subtitle (currently unused; cleared on zoom)
+    sbG.append("text")
+        .attr("class", "center-text")
+        .attr("pointer-events", "none")
+        .attr("y", 26)
+        .attr("text-anchor", "middle")
+        .style("font-size", "0.85rem")
+        .style("font-family", '"Adobe Caslon Pro", serif')
+        .attr("fill", "#002649")
+        .attr("opacity", 0)
+        .text("");
+
+    sunburstNodeMap.clear();
+    root.descendants().forEach(d => {
+        if (d.data.id) sunburstNodeMap.set(d.data.id, d);
+    });
+
+    updateBottomLabel(root);
+    setupMagnifier();
+}
+
+function zoomSunburst(event, p) {
+    if (!p) return;
+    if (event && event.defaultPrevented) return;   // click that ended a drag-pan
+    const targetParent = p.parent || root;
+
+    d3.select(".center-text").text("");
+
+    const centerR  = radius / SLICE_SIZE_FACTOR;
+    const margin   = 10;
+    const logoH    = 48;
+
+    if (p === root) {
+        // Logo back to center, hide name lines
+        svg.select(".center-logo")
+            .transition().duration(500)
+            .attr("x", -48).attr("y", -logoH / 2);
+        svg.select(".center-name-line1").transition().duration(300).attr("opacity", 0);
+        svg.select(".center-name-line2").transition().duration(300).attr("opacity", 0);
+    } else {
+        const nameParts = (p.data.name || "").split(" ");
+        const line1 = nameParts[0] || "";
+        const line2 = nameParts.slice(1).join(" ");
+        // Clamp each line to fit within circle diameter minus margin
+        const availW = (centerR - margin) * 2;
+        const charPx = 7;
+        const maxCh  = Math.max(1, Math.floor(availW / charPx));
+        const trunc  = s => s.length > maxCh ? s.slice(0, maxCh - 1) + "\u2026" : s;
+        // Logo shifts to top interior of circle
+        const logoY   = -centerR + margin;
+        const line1Y  = logoY + logoH + margin + 11;
+        const line2Y  = line1Y + 16;
+        svg.select(".center-logo")
+            .transition().duration(500)
+            .attr("x", -48).attr("y", logoY);
+        svg.select(".center-name-line1")
+            .text(trunc(line1))
+            .attr("y", line1Y)
+            .transition().duration(500)
+            .attr("opacity", 1);
+        svg.select(".center-name-line2")
+            .text(trunc(line2))
+            .attr("y", line2Y)
+            .transition().duration(500)
+            .attr("opacity", line2 ? 1 : 0);
+    }
+
+    currentSbNode = p;
+    updateBottomLabel(p);
+
+    // Sync tree when a sighted user clicks a sunburst slice
+    if (!_suppressSync && p.data.id && p.data.id !== "p-ROOT") {
+        syncTreeFromSunburst(p.data.id);
+    }
+
+    root.each(d => d.target = {
+        x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+        x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+        y0: Math.max(0, d.y0 - p.depth),
+        y1: d.y1 - p.depth,
+        data: d.data
+    });
+
+    // Any magnification unwinds back to 100% as part of the same transition.
+    stopViewAnim();
+    const vFrom = { ...view };
+    // rs: rings widen (or narrow) so the expanded branch fills the original chart area
+    const vTo   = { k: 1, x: 0, y: 0, phi: view.phi, psi: view.psi + wrapPi(view.phi - view.psi),
+                    rs: ringStretchFor(p) };
+    svg.node().__zoom = d3.zoomIdentity;          // keep d3.zoom's state in step
+    _viewLocked = true;
+
+    const t = svg.transition().duration(750);
+    t.tween("view", () => {
+        const iv = d3.interpolate(vFrom, vTo);
+        return u => { Object.assign(view, iv(u)); applyViewFrame(); };
+    });
+    const token = ++_viewTxToken;
+    t.on("end.view interrupt.view", () => {
+        if (token !== _viewTxToken) return;        // a newer click-zoom owns the view
+        _viewLocked = false;
+        updateZoomControls();
+        if (_pendingZoom !== null) {
+            const pz = _pendingZoom; _pendingZoom = null;
+            if (pz === "reset") zoomStep(0); else if (pz) zoomStep(Math.sign(pz), Math.abs(pz));
+        }
+    });
+    svg.select("circle").datum(targetParent);
+
+    // End-state values are computed in the 100% view.
+    // Every slice and label is animated (not just the visible ones): a slice
+    // left out keeps stale geometry and can resurface as a stray outer ray.
+    Object.assign(view, vTo);
+    path.interrupt(); label.interrupt();
+    path.transition(t)
+        .tween("data", d => {
+            // Interpolate only the layout box; interpolating .data would
+            // deep-copy the whole org subtree every frame.
+            const a = d.current, b = d.target;
+            return t => d.current = {
+                x0: a.x0 + (b.x0 - a.x0) * t, x1: a.x1 + (b.x1 - a.x1) * t,
+                y0: a.y0 + (b.y0 - a.y0) * t, y1: a.y1 + (b.y1 - a.y1) * t,
+                data: d.data
+            };
+        })
+        .attr("fill-opacity",   d => arcOpacity(d.target))
+        .attr("pointer-events", d => arcVisible(d.target) ? "auto" : "none")
+        .attrTween("d", function (d) {
+            const el = this;
+            return () => { el.style.strokeWidth = strokeFor(d); return arcFor(d); };
+        });
+
+    // A label is shown only while its text fits the slice's size in that
+    // frame, so names never spill over a slice that is still growing.
+    // Labels leaving the view keep their text and fade while they still fit.
+    label.each(function (d) {
+        const show = labelVisible({ current: d.target });
+        this.__leaving = !show;
+        if (show) setLabelTspans(this, getLabelLines(geom(d.target, d.data)));
+    });
+    label.transition(t)
+        .attrTween("transform", d => () => labelTransform(geom(d.current, d.data)))
+        .attrTween("fill-opacity", function (d) {
+            const el = this;
+            return u => {
+                if (u >= 1) return el.__leaving ? 0 : +labelFits(geom(d.target, d.data), el.__lines || []);
+                const fits = labelFits(geom(d.current, d.data), el.__lines || []);
+                return fits ? (el.__leaving ? 1 - u : 1) : 0;
+            };
+        });
+    Object.assign(view, vFrom);
+}
+
+// =================================================================
+// MAGNIFIER — wiring, rendering, keyboard
+// =================================================================
+function setupMagnifier() {
+    zoomBehavior = d3.zoom()
+        .scaleExtent([1, ZOOM_MAX])
+        .filter(ev => !_viewLocked && (!ev.ctrlKey || ev.type === "wheel") && !ev.button)
+        .constrain(clampTransform)
+        .on("zoom", onZoom)
+        .on("end", onZoomEnd);
+    // d3.zoom keeps drag-to-pan and touch pinch; the wheel is handled below
+    svg.call(zoomBehavior)
+        .on("dblclick.zoom", null)
+        .on("wheel.zoom", null)
+        .on("wheel.magnify", onWheel, { passive: false });
+    svg.node().__zoom = d3.zoomIdentity;
+    updateZoomControls();
+}
+
+// -----------------------------------------------------------------
+// WHEEL — zoom in intervals.
+// Scrolling magnifies toward the pointer; when magnification reaches
+// DRILL_K the branch under the pointer auto-expands to fill the chart
+// (exactly like clicking it), one reporting level per interval. Over a
+// leaf, or the centre, it just magnifies. Scrolling out past 100% steps
+// back up a level.
+// -----------------------------------------------------------------
+const DRILL_K   = 2;      // magnification at which the hovered branch expands
+const DRILL_OUT = 0.5;    // wheel-out past 100% (in doublings) before going up a level
+let _wheelOut = 0;
+
+function wheelDelta(e) {
+    // Same scaling as d3.zoom; ctrl+wheel is a trackpad pinch
+    return -e.deltaY * (e.deltaMode === 1 ? 0.05 : e.deltaMode ? 1 : 0.002) * (e.ctrlKey ? 10 : 1);
+}
+
+// Data angle (0..2pi) and ring depth under an SVG point, undoing pan, scale and fisheye
+function pointToLayout(px, py) {
+    const vx = px - view.x, vy = py - view.y;
+    const psi = Math.atan2(vx, -vy);
+    const theta = view.phi + fisheyeInv(wrapPi(psi - view.psi), fisheyeD(view.k));
+    return { theta: ((theta % TAU) + TAU) % TAU, ring: rInv(Math.hypot(vx, vy)) };
+}
+
+// The child of the focused person whose branch lies under the pointer,
+// if it has a branch to expand into.
+function drillTargetAt(px, py) {
+    const p = currentSbNode || root;
+    if (!p.children) return null;
+    const { theta, ring } = pointToLayout(px, py);
+    if (ring < 1) return null;                     // centre circle
+    const child = p.children.find(c => theta >= c.current.x0 && theta < c.current.x1);
+    return child && child.children ? child : null;
+}
+
+function onWheel(e) {
+    e.preventDefault();
+    if (!svg || _viewLocked) return;               // ignore momentum while a level animates
+    if (viewAnim) stopViewAnim(true);
+    const delta = wheelDelta(e);
+    if (!delta) return;
+    const [px, py] = d3.pointer(e, svg.node());
+    if (delta > 0) {
+        _wheelOut = 0;
+        const target = drillTargetAt(px, py);
+        const k = Math.min(target ? DRILL_K : ZOOM_MAX, view.k * Math.pow(2, delta));
+        if (target && k >= DRILL_K) { zoomSunburst(null, target); return; }
+        zoomViewAt(px, py, k);
+    } else if (view.k > 1.0001) {
+        _wheelOut = 0;
+        zoomViewAt(px, py, Math.max(1, view.k * Math.pow(2, delta)));
+    } else {
+        _wheelOut += -delta;
+        if (_wheelOut >= DRILL_OUT && currentSbNode && currentSbNode.parent) {
+            _wheelOut = 0;
+            zoomSunburst(null, currentSbNode.parent);
+        }
+    }
+}
+
+// Magnify to k keeping the point under (px, py) fixed, with the fisheye aimed there
+function zoomViewAt(px, py, k) {
+    const vx = px - view.x, vy = py - view.y;
+    if (Math.hypot(vx, vy) > 1) {
+        const psi = Math.atan2(vx, -vy);
+        view.phi = wrapPi(view.phi + fisheyeInv(wrapPi(psi - view.psi), fisheyeD(view.k)));
+        view.psi = psi;
+    }
+    if (k <= 1.0001) {
+        // Back at 100%: recentre and unwind the fisheye rotation
+        animateView({ k: 1, x: 0, y: 0, phi: view.phi, psi: view.psi + wrapPi(view.phi - view.psi) }, 250);
+        return;
+    }
+    const s = k / view.k;
+    const t = clampTransform(d3.zoomIdentity.translate(px - vx * s, py - vy * s).scale(k));
+    view.k = t.k; view.x = t.x; view.y = t.y;
+    svg.node().__zoom = t;
+    tooltipSel.style("opacity", 0);
+    renderView();
+}
+
+// Pan is limited so some of the chart always stays in view; at 100% the
+// chart snaps back to centre.
+function clampTransform(t) {
+    const lim = (t.k - 1) * 3 * radius * MAX_DEPTH_VISIBLE / SLICE_SIZE_FACTOR;
+    const x = Math.max(-lim, Math.min(lim, t.x));
+    const y = Math.max(-lim, Math.min(lim, t.y));
+    return (x === t.x && y === t.y) ? t : d3.zoomIdentity.translate(x, y).scale(t.k);
+}
+
+function onZoom(ev) {
+    // Drag-pan and touch pinch (the wheel is handled by onWheel)
+    if (viewAnim) { stopViewAnim(true); }
+    const t = ev.transform;
+    view.k = t.k; view.x = t.x; view.y = t.y;
+    tooltipSel.style("opacity", 0);
+    renderView();
+}
+
+// Back at 100%: unwind any leftover rotation so the chart matches the tree order again
+function onZoomEnd() {
+    if (view.k <= 1.0001 && Math.abs(wrapPi(view.psi - view.phi)) > 1e-4) {
+        animateView({ k: 1, x: 0, y: 0, phi: view.phi, psi: view.psi + wrapPi(view.phi - view.psi) }, 300);
+    }
+}
+
+// Cheap per-frame update used inside click-zoom transitions
+function applyViewFrame() {
+    sbG.attr("transform", `translate(${view.x},${view.y})`);
+    svg.select("circle").attr("r", ringPx());
+}
+
+// Full redraw from the current view (wheel, pan, keyboard zoom)
+function renderView() {
+    applyViewFrame();
+    const lim = depthLimit();
+    path.attr("d", d => arcFor(d))
+        .attr("fill-opacity", d => arcOpacity(d.current))
+        .attr("pointer-events", d => arcVisible(d.current) ? "auto" : "none")
+        .style("stroke-width", d => strokeFor(d));
+    label.each(function (d) {
+        const c = d.current;
+        const g = geom(c, d.data);
+        const lines = (c.y1 <= lim && c.y0 >= 1 && c.x1 > c.x0) ? getLabelLines(g) : [];
+        setLabelTspans(this, lines);
+        this.setAttribute("fill-opacity", lines.length ? 1 : 0);
+        this.setAttribute("transform", labelTransform(g));
+    });
+    updateZoomControls();
+}
+
+function stopViewAnim(jumpToEnd) {
+    if (!viewAnim) return;
+    viewAnim.stop();
+    viewAnim = null;
+    if (jumpToEnd && viewAnimTarget) Object.assign(view, viewAnimTarget);
+    viewAnimTarget = null;
+}
+
+function animateView(target, duration) {
+    stopViewAnim();
+    const from = { ...view };
+    target = { ...target };
+    target.phi = from.phi + wrapPi(target.phi - from.phi);
+    target.psi = from.psi + wrapPi(target.psi - from.psi);
+    const ct = clampTransform(d3.zoomIdentity.translate(target.x, target.y).scale(target.k));
+    target.x = ct.x; target.y = ct.y;
+    svg.node().__zoom = ct;                        // keep d3.zoom's state in step
+    if (!duration || reduceMotion.matches) {
+        Object.assign(view, target);
+        renderView();
+        return;
+    }
+    viewAnimTarget = target;
+    const iv = d3.interpolate(from, target);
+    viewAnim = d3.timer(elapsed => {
+        const u = Math.min(1, elapsed / duration);
+        Object.assign(view, iv(d3.easeCubicInOut(u)));
+        renderView();
+        if (u >= 1) stopViewAnim();
+    });
+}
+
+// The sunburst node a keyboard zoom should centre on: the tree's focused item,
+// else the selected one, provided it is drawn in the current view.
+function keyboardAnchorNode() {
+    const ids = [rovingFocusEl && rovingFocusEl.dataset.nodeId, selectedId];
+    for (const id of ids) {
+        const n = id && sunburstNodeMap.get(id);
+        if (n && n.current.y0 >= 1 && n.current.x1 > n.current.x0) return n;
+    }
+    return null;
+}
+
+// View that magnifies by k with node n at the centre of the chart area
+function viewCentredOn(n, k) {
+    const c = n.current;
+    const g = geom(c, n.data);
+    const psi = (g.x0 + g.x1) / 2;               // where it is drawn now: no spin
+    const r   = (rPx(c.y0, k) + rPx(c.y1, k)) / 2;
+    return { k, phi: (c.x0 + c.x1) / 2, psi, x: -r * Math.sin(psi), y: r * Math.cos(psi) };
+}
+
+// dir: +1 in, -1 out, 0 reset. Steps from where an in-flight zoom is heading,
+// so quick repeated presses add up.
+function zoomStep(dir, steps = 1) {
+    if (!svg) return;
+    if (_viewLocked) {
+        _pendingZoom = dir === 0 ? "reset"
+                     : (typeof _pendingZoom === "number" ? _pendingZoom : 0) + dir * steps;
+        return;
+    }
+    const base = viewAnimTarget || view;          // where any in-flight zoom is heading
+    const k0 = base.k;
+    // Same intervals as the wheel: + expands the branch leading to the focused
+    // person once magnification reaches DRILL_K; - at 100% goes up a level.
+    const target = dir > 0 ? keyboardDrillTarget() : null;
+    let k = dir === 0 ? 1 : Math.max(1, Math.min(ZOOM_MAX, k0 * Math.pow(1.5, dir * steps)));
+    if (target && k >= DRILL_K) {
+        stopViewAnim();
+        zoomSunburst(null, target);
+        announceText(`Chart expanded to ${target.data.name}'s team`);
+        return;
+    }
+    if (dir < 0 && k0 <= 1.0001 && currentSbNode && currentSbNode.parent) {
+        const up = currentSbNode.parent;
+        zoomSunburst(null, up);
+        announceText(up === root ? "Chart showing the whole company" : `Chart expanded to ${up.data.name}'s team`);
+        return;
+    }
+    if (k <= 1.01) {
+        animateView({ k: 1, x: 0, y: 0, phi: base.phi, psi: base.psi + wrapPi(base.phi - base.psi) }, 350);
+    } else if (k !== k0) {
+        const n = keyboardAnchorNode();
+        const s = k / k0;
+        animateView(n ? viewCentredOn(n, k)
+                      : { k, x: base.x * s, y: base.y * s, phi: base.phi, psi: base.psi }, 300);
+    }
+    announceZoom();
+}
+
+// Keep the focused person in view while arrowing through the tree when magnified
+function followTreeFocus(el) {
+    if (!svg || _viewLocked || view.k <= 1.0001) return;
+    const n = el && sunburstNodeMap.get(el.dataset.nodeId);
+    if (n && n.current.y0 >= 1 && n.current.x1 > n.current.x0 && n.current.y1 <= depthLimit()) {
+        animateView(viewCentredOn(n, view.k), 250);
+    }
+}
+
+function zoomTargetK() { return viewAnimTarget ? viewAnimTarget.k : view.k; }
+
+function updateZoomControls() {
+    const k = zoomTargetK();
+    const lvl = document.getElementById("zoom-level");
+    if (!lvl) return;
+    lvl.textContent = Math.round(k * 100) + "%";
+    document.getElementById("zoom-out").setAttribute("aria-disabled", String(k <= 1.0001));
+    document.getElementById("zoom-reset").setAttribute("aria-disabled", String(k <= 1.0001));
+    document.getElementById("zoom-in").setAttribute("aria-disabled", String(k >= ZOOM_MAX - 1e-6));
+}
+
+function announceZoom() {
+    announceText(`Chart zoom ${Math.round(zoomTargetK() * 100)}%`);
+}
+function announceText(msg) {
+    document.getElementById("zoom-announce").textContent = msg;
+}
+
+// The child of the chart's focused person that leads to the person focused in
+// the tree, if it is a branch that can expand.
+function keyboardDrillTarget() {
+    const p = currentSbNode || root;
+    const id = (rovingFocusEl && rovingFocusEl.dataset.nodeId) || selectedId;
+    const n = id && sunburstNodeMap.get(id);
+    if (!n || n.depth <= p.depth) return null;
+    const child = n.ancestors().find(a => a.parent === p);
+    return child && child.children ? child : null;
+}
+
+function setMagnifierHidden(hidden) {
+    document.getElementById("zoom-controls").hidden = hidden;
+    document.getElementById("zoom-hint").hidden = hidden;
+}
+
+(function wireZoomButtons() {
+    const on = (id, dir) => document.getElementById(id).addEventListener("click", e => {
+        if (e.currentTarget.getAttribute("aria-disabled") === "true") return;
+        zoomStep(dir);
+    });
+    on("zoom-in", 1); on("zoom-out", -1); on("zoom-reset", 0);
+})();
+
+// =================================================================
+// SUNBURST HELPERS
+// =================================================================
+function updateBottomLabel(d) {
+    if (!d || !d.data) return;
+    d3.select("#bottom-label .info-name").text(d.data.name);
+    d3.select("#bottom-label .info-title").text(d.data.title || "");
+    d3.select("#bottom-label .info-dept").text(d.data.department || "");
+    d3.select("#bottom-label").style("opacity", 1);
+}
+
+const showTooltip = function (event, d) {
+    if (!arcVisible(d.current || d)) return;
+    tooltipSel.style("opacity", 1)
+        .html(`<strong>${d.data.name}</strong>${d.data.title}`);
+    if (event && event.pageX)
+        tooltipSel.style("left", (event.pageX + 15) + "px")
+                   .style("top",  (event.pageY - 15) + "px");
+    updateBottomLabel(d);
+
+    if (d.children) {
+        const ids = new Set(d.descendants().map(n => n.data.id));
+        path.attr("fill", n => ids.has(n.data.id) ? "#96690e" : sbColorScale(n.depth));
+    }
+};
+const hideTooltip = function () {
+    tooltipSel.style("opacity", 0);
+    path.attr("fill", n => sbColorScale(n.depth));
+    updateBottomLabel(currentSbNode);
+};
+
+function arcVisible(d) {
+    return d.y1 <= depthLimit() && d.y0 >= 1 && d.x1 > d.x0;
+}
+// d: { current: layoutBox } where the box carries .data
+function labelVisible(d) {
+    const s = d.current || d;
+    return s.y1 <= depthLimit() && s.y0 >= 1 && getLabelLines(geom(s, s.data)).length > 0;
+}
+// d: screen geometry from geom()
+function labelTransform(d) {
+    const deg = (d.x0 + d.x1) / 2 * 180 / Math.PI;
+    const x = ((deg % 360) + 360) % 360;
+    const y = (rPx(d.y0) + rPx(d.y1)) / 2;
+    return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
+}
+// Progressive collapse — keeps first name visible as long as possible:
+// 1. firstName lastName     — one line, both full
+// 2. [firstName, lastName]  — two lines, both full
+// 3. [firstName, L.]        — two lines, last abbreviated
+// 4. firstName L.           — one line, first full + last abbreviated
+// 5. F. LastName            — one line, first abbreviated + last full
+// 6. F. L.                  — one line, both abbreviated
+// 7. FL                     — initials only
+// Label fitting. Labels run along the radius (see labelTransform) and are
+// centred on the slice (dominant-baseline: central), so a label is a box of
+// the text's measured width (radial) by its stacked line height (across the
+// slice). It is shown only if that box, grown by the padding, stays inside the
+// wedge: clear of both ring edges and of both slice sides at the narrow inner
+// end. Otherwise it stays hidden.
+const LABEL_FONT  = '11px "Helvetica Neue", Helvetica, sans-serif';
+const LABEL_PAD_R = 6;     // px between text and the inner/outer ring edge
+const LABEL_PAD_T = 5;     // px between text and the slice's sides (includes the separator)
+const _labelCtx   = document.createElement("canvas").getContext("2d");
+const _labelWidth = new Map();
+function labelTextWidth(str) {
+    let w = _labelWidth.get(str);
+    if (w === undefined) {
+        _labelCtx.font = LABEL_FONT;
+        w = _labelCtx.measureText(str).width + 2;    // +2: text-shadow blur
+        _labelWidth.set(str, w);
+    }
+    return w;
+}
+// g: screen geometry from geom(); lines: 1 or 2 strings
+function labelFits(g, lines) {
+    if (!g || !lines || !lines.length) return false;
+    const rIn  = rPx(g.y0), rOut = rPx(g.y1) - 1;    // arcs are drawn 1px short of y1
+    const rMid = (rPx(g.y0) + rPx(g.y1)) / 2;        // where labelTransform puts the text
+    const w    = Math.max(...lines.map(labelTextWidth));
+    if (rMid - w / 2 < rIn + LABEL_PAD_R || rMid + w / 2 > rOut - LABEL_PAD_R) return false;
+    // Half the label's height across the slice: line spacing 1.1em, plus
+    // half a line, plus the shadow's 1px offset and blur
+    const halfH = 11 * (0.55 * (lines.length - 1) + 0.5) + 2;
+    const a  = Math.min(Math.PI, (g.x1 - g.x0) / 2);  // half the slice's angle
+    const r1 = rMid - w / 2;                          // the label's inner (narrowest) end
+    // Distance from the label's inner corner to the slice's side
+    return r1 * Math.sin(a) - halfH * Math.cos(a) >= LABEL_PAD_T;
+}
+
+function getLabelLines(d) {
+    if (!d || !d.data || !d.data.name) return [];
+    const name   = d.data.name;
+    const fit    = lines => labelFits(d, lines);
+
+    const parts     = name.split(" ");
+    const firstName = parts[0];
+    const lastName  = parts.length > 1 ? parts[parts.length - 1] : null;
+
+    if (!lastName) {
+        if (fit([name])) return [name];
+        if (fit([name[0] + "."])) return [name[0] + "."];
+        return [];
+    }
+
+    const firstAbbr     = firstName[0] + ".";
+    const lastParts     = lastName.split("-");
+    const lastAbbr      = lastParts.map(p => p[0] + ".").join("-");  // e.g. "H." or "M.-H."
+    const fullOneLine   = firstName + " " + lastName;    // e.g. Avery Bennett
+    const firstLastAbbr = firstName + " " + lastAbbr;   // e.g. Avery B. or Avery M.-B.
+    const abbrFirst     = firstAbbr + " " + lastName;   // e.g. A. Bennett
+    const abbrBoth      = firstAbbr + " " + lastAbbr;   // e.g. A. B. or A. M.-B.
+    const initials      = firstName[0] + "." + lastAbbr; // e.g. A.B. or A.M.-B.
+
+    // Prefer the full name on one line when the ring is long enough, then
+    // the two-line form, then progressively shorter forms.
+    const options = [
+        [fullOneLine],
+        [firstName, lastName],
+        [firstName, lastAbbr],
+        [firstLastAbbr],
+        [abbrFirst],
+        [abbrBoth],
+        [initials],
+    ];
+    return options.find(fit) || [];
+}
+
+// Render lines into a <text> element via <tspan> children
+function setLabelTspans(textEl, lines) {
+    textEl.__lines = lines;
+    const sel = d3.select(textEl);
+    sel.text(''); // clear all content (text nodes + child elements)
+    if (lines.length === 0) {
+        sel.attr('visibility', 'hidden');
+        return;
+    }
+    sel.attr('visibility', null);
+    if (lines.length === 1) {
+        sel.append("tspan").attr("x", 0).attr("dy", "0em").text(lines[0]);
+    } else {
+        // Two lines centered: shift first up, second down
+        sel.append("tspan").attr("x", 0).attr("dy", "-0.55em").text(lines[0]);
+        sel.append("tspan").attr("x", 0).attr("dy", "1.1em").text(lines[1]);
+    }
+}
+
+// =================================================================
+// TENURE DATA (tenure_data.js, generated by make_dashboard_data.py)
+// =================================================================
+// The tornado code uses short keys: n=name, s=A(ctive)/F(ormer), y=years, h=hire, t=term
+TENURE_DATA.forEach(e => {
+    e.n = e.name; e.s = e.status === 'Active' ? 'A' : 'F';
+    e.y = e.tenure_years; e.h = e.hire_date; e.t = e.term_date;
+});
+
+// =================================================================
+// DEPARTMENT COLOURS (used by the hierarchy easter-egg view)
+// =================================================================
+const DEPT_ALIASES = [
+    [/^IT\s*\([^)]+\)$/i,              'Information Technology'],
+    [/^IT$/i,                          'Information Technology']
+];
+// Parentheticals that qualify a department (not a person's name) are kept
+const DEPT_QUALIFIER_RE = /\s*\((Trade|College|Digital|Custom)\)\s*$/i;
+
+function normalizeDeptName(dept) {
+    const raw = (dept || '').trim();
+    for (const [re, name] of DEPT_ALIASES) if (re.test(raw)) return name;
+    if (DEPT_QUALIFIER_RE.test(raw)) return raw;
+    return raw
+        .replace(/\s*\([^)]+\)\s*$/, '')       // strip (PersonName) suffix
+        .replace(/:\s*Digital Media$/i, '')    // merge into parent
+        .trim();
+}
+
+const DEPT_COLOR_GROUPS = {"Senior Leadership": "#595959", "Editorial": "#196263", "Trade Editorial": "#174c4d", "Academic Editorial": "#196263", "Children's Books": "#1c6275", "Sales": "#9e3331", "Trade Sales": "#7a2a28", "Academic Sales": "#9e3331", "International Sales": "#7a2a28", "Marketing": "#5d4dab", "Trade Marketing": "#483c82", "Publicity": "#5d4dab", "Academic Marketing": "#483c82", "Design & Production": "#216621", "Art & Design": "#1c4f1c", "Production": "#216621", "Manufacturing": "#1c4f1c", "Finance": "#7a4f11", "Accounting": "#633b12", "Royalties": "#7a4f11", "Technology": "#1b4c59", "Digital Products": "#1c6275", "Information Technology": "#1b4c59", "Operations": "#475b70", "Distribution": "#32475e", "Contracts & Rights": "#475b70", "People": "#475b70", "Human Resources": "#32475e"};
+function deptColor(name) { return DEPT_COLOR_GROUPS[name] || '#595959'; }
+
+// =================================================================
+// TORNADO EASTER EGG
+// =================================================================
+function showTornado() {
+    document.getElementById('tornado-panel').removeAttribute('hidden');
+    const svgEl = document.querySelector('#chart-container svg');
+    if (svgEl) svgEl.style.visibility = 'hidden';
+    setMagnifierHidden(true);
+    renderTornado();
+    document.getElementById('return-to-chart').focus();
+}
+
+function hideTornado() {
+    document.getElementById('tornado-panel').setAttribute('hidden', '');
+    const svgEl = document.querySelector('#chart-container svg');
+    if (svgEl) svgEl.style.visibility = 'visible';
+    setMagnifierHidden(false);
+    // Clear search and return focus
+    const inp = document.getElementById('tree-search-input');
+    inp.value = '';
+    filterTree('');
+    inp.focus();
+}
+
+function renderTornado() {
+    // Wait a frame so the panel is visible and has layout (clientWidth > 0)
+    requestAnimationFrame(() => {
+        renderTornadoChart(TENURE_DATA, 5);
+        const search = document.getElementById('tornado-search');
+        search.oninput = function () {
+            const q = this.value.trim().toLowerCase();
+            const status = document.getElementById('tornado-search-status');
+            if (!q) {
+                renderTornadoChart(TENURE_DATA, parseInt(document.getElementById('tornado-bucket')?.value) || 5);
+                status.textContent = '';
+                return;
+            }
+            const filtered = TENURE_DATA.filter(e => (e.n || '').toLowerCase().includes(q));
+            renderTornadoChart(filtered, parseInt(document.getElementById('tornado-bucket')?.value) || 5);
+            status.textContent = `Showing ${filtered.length} of ${TENURE_DATA.length} employees`;
+        };
+        document.getElementById('return-to-chart').onclick = hideTornado;
+        // Bucket size slider
+        const bucketSlider = document.getElementById('tornado-bucket');
+        const bucketLabelEl = document.getElementById('tornado-bucket-label');
+        if (bucketSlider) {
+            bucketSlider.oninput = function() {
+                const bs = parseInt(this.value);
+                bucketLabelEl.textContent = bs + (bs === 1 ? ' year' : ' years');
+                this.setAttribute('aria-valuenow', bs);
+                const q = document.getElementById('tornado-search').value.trim().toLowerCase();
+                const filtered = q ? TENURE_DATA.filter(e => (e.n||'').toLowerCase().includes(q)) : TENURE_DATA;
+                renderTornadoChart(filtered, bs);
+            };
+        }
+    });
+}
+
+function renderTornadoChart(data, bucketSize) {
+    data = data || TENURE_DATA;
+    bucketSize = bucketSize || 5;
+    const wrap = document.getElementById('tornado-chart-wrap');
+    wrap.innerHTML = '';
+    document.getElementById('tenure-table-wrap').innerHTML = '';
+
+    const maxYr = data.length ? Math.ceil(Math.max(...data.map(e => e.y))) : 0;
+    const numBuckets = Math.ceil(maxYr / bucketSize) + 1;
+    const buckets = d3.range(0, numBuckets);
+
+    const activeBuckets = new Map(), formerBuckets = new Map();
+    buckets.forEach(b => { activeBuckets.set(b, []); formerBuckets.set(b, []); });
+    data.forEach(e => {
+        const b = Math.min(Math.floor(e.y / bucketSize), numBuckets - 1);
+        (e.s === 'A' ? activeBuckets : formerBuckets).get(b)?.push(e);
+    });
+
+    const barH = 12, barGap = 4, centerGap = 50;
+    const totalH = buckets.length * (barH + barGap) + 44;
+    const W = Math.min(wrap.clientWidth || 720, 820);
+    const halfW = (W - centerGap) / 2 - 40;
+
+    const maxCount = Math.max(1,
+        ...buckets.map(b => Math.max(
+            (activeBuckets.get(b)||[]).length,
+            (formerBuckets.get(b)||[]).length
+        ))
+    );
+    const xScale = d3.scaleLinear().domain([0, maxCount]).range([0, halfW]);
+
+    const svgT = d3.select(wrap).append('svg')
+        .attr('width', W).attr('height', totalH)
+        .attr('aria-hidden', 'true');  // bars are individually focusable
+
+    // Column headers
+    const hdrG = svgT.append('g').attr('transform', 'translate(0,0)');
+    hdrG.append('text').attr('x', W/2 - centerGap/2 - 10).attr('y', 14)
+        .attr('text-anchor','end').attr('font-size','13px').attr('fill','#002649').attr('font-weight','bold')
+        .attr('font-family','Helvetica Neue, sans-serif').text('← Former employees');
+    hdrG.append('text').attr('x', W/2 + centerGap/2 + 10).attr('y', 14)
+        .attr('text-anchor','start').attr('font-size','13px').attr('fill','#002649').attr('font-weight','bold')
+        .attr('font-family','Helvetica Neue, sans-serif').text('Current employees →');
+
+    const g = svgT.append('g').attr('transform', `translate(${W/2},24)`);
+
+    buckets.forEach((yr, i) => {
+        const y = i * (barH + barGap);
+        const aList = activeBuckets.get(yr) || [];
+        const fList = formerBuckets.get(yr) || [];
+
+        // Center year label
+        g.append('text').attr('x', 0).attr('y', y + barH/2).attr('dy','0.35em')
+            .attr('text-anchor','middle').attr('font-size','13px').attr('fill','#002649').attr('font-weight','bold')
+            .attr('font-family','Helvetica Neue, sans-serif')
+            .text(bucketSize === 1 ? (yr === 0 ? '<1yr' : yr + 'yr') : (yr * bucketSize) + '\u2013' + (yr * bucketSize + bucketSize - 1) + 'yr');
+
+        // Active bar (right)
+        if (aList.length > 0) {
+            const bW = xScale(aList.length);
+            const bar = g.append('g').attr('class','t-bar')
+                .attr('role','button').attr('tabindex','0').attr('aria-pressed','false')
+                .attr('aria-label', `${aList.length} current employee${aList.length!==1?'s':''} with ${yr} year${yr!==1?'s':''} tenure. Press Enter to see names.`);
+            bar.append('rect')
+                .attr('x', centerGap/2 + 2).attr('y', y)
+                .attr('width', bW).attr('height', barH)
+                .attr('fill','#196263').attr('rx',2)
+                .attr('stroke','transparent').attr('stroke-width',0);
+            if (bW > 20) bar.append('text')
+                .attr('x', centerGap/2 + bW + 4).attr('y', y + barH/2).attr('dy','0.35em')
+                .attr('font-size','13px').attr('fill','#002649').text(aList.length);
+            bar.on('click', () => selectTornadoBar(yr,'A',aList,bar));
+            bar.on('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectTornadoBar(yr,'A',aList,bar); } });
+        }
+
+        // Former bar (left, mirrored)
+        if (fList.length > 0) {
+            const bW = xScale(fList.length);
+            const bar = g.append('g').attr('class','t-bar')
+                .attr('role','button').attr('tabindex','0').attr('aria-pressed','false')
+                .attr('aria-label', `${fList.length} former employee${fList.length!==1?'s':''} with ${yr} year${yr!==1?'s':''} tenure. Press Enter to see names.`);
+            bar.append('rect')
+                .attr('x', -centerGap/2 - bW - 2).attr('y', y)
+                .attr('width', bW).attr('height', barH)
+                .attr('fill','#8493a3').attr('rx',2)
+                .attr('stroke','transparent').attr('stroke-width',0);
+            if (bW > 20) bar.append('text')
+                .attr('x', -centerGap/2 - bW - 6).attr('y', y + barH/2).attr('dy','0.35em')
+                .attr('text-anchor','end').attr('font-size','13px').attr('fill','#002649').text(fList.length);
+            bar.on('click', () => selectTornadoBar(yr,'F',fList,bar));
+            bar.on('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectTornadoBar(yr,'F',fList,bar); } });
+        }
+    });
+
+    // Wire return button
+    const retBtn = document.getElementById('return-to-chart');
+    retBtn.onclick = hideTornado;
+}
+
+function selectTornadoBar(yr, side, employees, barG) {
+    d3.selectAll('.t-bar').attr('aria-pressed','false')
+        .select('rect').attr('stroke','transparent').attr('stroke-width',0);
+    barG.attr('aria-pressed','true')
+        .select('rect').attr('stroke', side==='A'?'#002649':'#475b70').attr('stroke-width',2);
+
+    const sideLabel = side === 'A' ? 'Current' : 'Former';
+    document.getElementById('tenure-announce').textContent =
+        `${sideLabel} employees with ${yr} year${yr!==1?'s':''} tenure. ${employees.length} name${employees.length!==1?'s':''} listed in the results panel.`;
+
+    const wrap = document.getElementById('tenure-table-wrap');
+    wrap.innerHTML = `
+        <table>
+            <caption>${sideLabel} employees — ${yr} year${yr!==1?'s':''} tenure (${employees.length} total)</caption>
+            <thead><tr>
+                <th scope="col">Name</th>
+                <th scope="col">Start</th>
+                ${side==='F'?'<th scope="col">End</th>':''}
+                <th scope="col">Years</th>
+            </tr></thead>
+            <tbody>${employees.slice().sort((a,b)=>a.n.localeCompare(b.n)).map(e=>`
+                <tr><td>${e.n}</td><td>${e.h||'—'}</td>
+                ${side==='F'?`<td>${e.t||'—'}</td>`:''}
+                <td>${e.y.toFixed(1)}</td></tr>`).join('')}
+            </tbody>
+        </table>`;
+    wrap.focus();
+}
+
+// Disclaimer modal
+(function() {
+    const btn   = document.getElementById('disclaimer-btn');
+    const modal = document.getElementById('disclaimer-modal');
+    const close = document.getElementById('disclaimer-modal-close');
+    btn.addEventListener('click', () => { modal.removeAttribute('hidden'); close.focus(); });
+    close.addEventListener('click', () => { modal.setAttribute('hidden', ''); btn.focus(); });
+    modal.addEventListener('click', e => { if (e.target === modal) { modal.setAttribute('hidden', ''); btn.focus(); } });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hasAttribute('hidden')) { modal.setAttribute('hidden', ''); btn.focus(); } });
+})();
+
+// =================================================================
+// HIERARCHY EASTER EGG
+// =================================================================
+let _hierRendered = false;
+
+function showHierarchy() {
+    const overlay  = document.getElementById('hier-cut-overlay');
+    const panel    = document.getElementById('hierarchy-panel');
+    const svgEl    = document.querySelector('#chart-container svg');
+    const inp      = document.getElementById('tree-search-input');
+
+    // Cut animation: flash a white line across the sunburst
+    overlay.removeAttribute('hidden');
+    const line = document.getElementById('hier-cut-line');
+    line.style.width = '0';
+    requestAnimationFrame(() => {
+        line.style.width = '100vw';
+        setTimeout(() => {
+            // Hide sunburst, show hierarchy
+            if (svgEl) svgEl.style.visibility = 'hidden';
+            setMagnifierHidden(true);
+            panel.removeAttribute('hidden');
+            overlay.setAttribute('hidden', '');
+            line.style.width = '0';
+            if (!_hierRendered) { renderHierarchyChart(); _hierRendered = true; }
+            document.getElementById('return-from-hierarchy').focus();
+        }, 300);
+    });
+
+    document.getElementById('return-from-hierarchy').onclick = hideHierarchy;
+}
+
+function hideHierarchy() {
+    const panel  = document.getElementById('hierarchy-panel');
+    const svgEl  = document.querySelector('#chart-container svg');
+    const inp    = document.getElementById('tree-search-input');
+    panel.setAttribute('hidden', '');
+    if (svgEl) svgEl.style.visibility = 'visible';
+    setMagnifierHidden(false);
+    inp.value = '';
+    filterTree('');
+    inp.focus();
+}
+
+function renderHierarchyChart() {
+    // Build hierarchy from sunburstNodeMap (already populated by renderSunburst)
+    const hierRoot = d3.hierarchy(root.data, d => d.children);
+
+    const NODE_W = 160, NODE_H = 36, H_GAP = 24, V_GAP = 48;
+    const layout = d3.tree().nodeSize([NODE_H + V_GAP, NODE_W + H_GAP]);
+
+    // Start with only depth 0 and 1 expanded
+    hierRoot.descendants().forEach(d => {
+        if (d.depth >= 2 && d.children) { d._children = d.children; d.children = null; }
+    });
+
+    const container = document.getElementById('hierarchy-chart');
+    const cW = container.clientWidth  || window.innerWidth;
+    const cH = container.clientHeight || window.innerHeight - 50;
+
+    const hierSvg = d3.select('#hierarchy-chart').append('svg')
+        .attr('width', cW).attr('height', cH)
+        .style('font-family', '"Helvetica Neue", sans-serif');
+
+    const zoomG = hierSvg.append('g');
+
+    const zoom = d3.zoom()
+        .scaleExtent([0.05, 3])
+        .on('zoom', e => zoomG.attr('transform', e.transform));
+    hierSvg.call(zoom);
+
+    // Initial translate so root is roughly centered left
+    hierSvg.call(zoom.transform, d3.zoomIdentity.translate(NODE_W + 40, cH / 2).scale(0.7));
+
+    function colorForNode(d) {
+        const dept = d.data.department || '';
+        return deptColor(normalizeDeptName(dept)) || '#475b70';
+    }
+
+    function update(source) {
+        layout(hierRoot);
+        const nodes = hierRoot.descendants();
+        const links = hierRoot.links();
+
+        // Links
+        const link = zoomG.selectAll('.hier-link')
+            .data(links, d => d.target.data.id || d.target.data.name);
+
+        const linkEnter = link.enter().append('path')
+            .attr('class', 'hier-link')
+            .attr('fill', 'none')
+            .attr('stroke', '#ccd5de')
+            .attr('stroke-width', 1.5)
+            .attr('d', () => {
+                const o = { x: source._x0 || source.x, y: source._y0 || source.y };
+                return `M${o.y},${o.x}C${o.y + NODE_W/2},${o.x} ${o.y + NODE_W/2},${o.x} ${o.y},${o.x}`;
+            });
+
+        linkEnter.merge(link)
+            .transition().duration(300)
+            .attr('d', d => {
+                const s = d.source, t = d.target;
+                return `M${s.y + NODE_W},${s.x}` +
+                       `C${s.y + NODE_W + H_GAP},${s.x}` +
+                       ` ${t.y - H_GAP},${t.x}` +
+                       ` ${t.y},${t.x}`;
+            });
+
+        link.exit().transition().duration(200)
+            .attr('d', () => {
+                const o = { x: source.x, y: source.y };
+                return `M${o.y},${o.x}C${o.y},${o.x} ${o.y},${o.x} ${o.y},${o.x}`;
+            }).remove();
+
+        // Nodes
+        const node = zoomG.selectAll('.hier-node')
+            .data(nodes, d => d.data.id || d.data.name);
+
+        const nodeEnter = node.enter().append('g')
+            .attr('class', 'hier-node')
+            .attr('transform', () => `translate(${source._y0 || source.y},${source._x0 || source.x})`)
+            .style('cursor', d => (d.children || d._children) ? 'pointer' : 'default')
+            .on('click', (e, d) => {
+                e.stopPropagation();
+                if (d._children) { d.children = d._children; d._children = null; }
+                else if (d.children) { d._children = d.children; d.children = null; }
+                else return;
+                d._x0 = d.x; d._y0 = d.y;
+                update(d);
+            });
+
+        // Rect
+        nodeEnter.append('rect')
+            .attr('x', 0).attr('y', -NODE_H / 2)
+            .attr('width', NODE_W).attr('height', NODE_H)
+            .attr('rx', 4)
+            .attr('fill', d => colorForNode(d))
+            .attr('opacity', 0.88);
+
+        // Expand/collapse indicator
+        nodeEnter.filter(d => d.children || d._children)
+            .append('rect')
+            .attr('class', 'hier-expand-btn')
+            .attr('x', NODE_W - 14).attr('y', -7)
+            .attr('width', 14).attr('height', 14)
+            .attr('rx', 2)
+            .attr('fill', 'rgba(255,255,255,0.25)');
+
+        nodeEnter.filter(d => d.children || d._children)
+            .append('text')
+            .attr('class', 'hier-expand-icon')
+            .attr('x', NODE_W - 7).attr('y', 4)
+            .attr('text-anchor', 'middle')
+            .attr('fill', 'white')
+            .style('font-size', '9px')
+            .style('pointer-events', 'none')
+            .text(d => d.children ? '−' : '+');
+
+        // Name text
+        nodeEnter.append('text')
+            .attr('class', 'hier-name')
+            .attr('x', 8).attr('y', -4)
+            .attr('fill', 'white')
+            .style('font-size', '10px')
+            .style('font-weight', '600')
+            .style('pointer-events', 'none')
+            .text(d => {
+                const name = d.data.name || '';
+                return name.length > 20 ? name.slice(0, 19) + '…' : name;
+            });
+
+        // Title text
+        nodeEnter.append('text')
+            .attr('class', 'hier-title')
+            .attr('x', 8).attr('y', 10)
+            .attr('fill', 'rgba(255,255,255,0.78)')
+            .style('font-size', '8.5px')
+            .style('pointer-events', 'none')
+            .text(d => {
+                const t = d.data.title || '';
+                return t.length > 26 ? t.slice(0, 25) + '…' : t;
+            });
+
+        const nodeUpdate = nodeEnter.merge(node);
+
+        nodeUpdate.transition().duration(300)
+            .attr('transform', d => `translate(${d.y},${d.x})`);
+
+        // Update expand icons after collapse/expand
+        nodeUpdate.select('.hier-expand-icon')
+            .text(d => d.children ? '−' : '+');
+
+        // Update rect color (dept can change with re-render)
+        nodeUpdate.select('rect:first-of-type')
+            .attr('fill', d => colorForNode(d));
+
+        node.exit().transition().duration(200)
+            .attr('transform', `translate(${source.y},${source.x})`)
+            .remove();
+
+        // Save positions for next transition
+        nodes.forEach(d => { d._x0 = d.x; d._y0 = d.y; });
+    }
+
+    update(hierRoot);
+}
+
+initApp();
+</script>
+</body>
+</html>

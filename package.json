@@ -1,8 +1,12 @@
 {
   "name": "accessible-org-chart",
   "version": "1.0.0",
-  "description": "Static D3.js prototypes of organizational charts (synthetic data), built for WCAG.",
+  "description": "Static D3.js org charts (synthetic data), built for WCAG: three prototypes and a dashboard.",
   "scripts": {
-    "start": "open index.html"
+    "start": "python3 -m http.server 8000",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0"
   }
 }

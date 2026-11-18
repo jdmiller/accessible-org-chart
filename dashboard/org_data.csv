@@ -1,0 +1,383 @@
+node_id,manager_id,name,title,department,location
+e-1001,,Aurora Holloway,President & Publisher,Senior Leadership,London
+e-1002,e-1001,Kamal Ueda,"Vice President, Editorial",Editorial,New York
+e-1003,e-1002,Willa Ekwueme,"Editorial Director, Trade",Trade Editorial,London
+e-1004,e-1003,Leonie Lowell,Executive Editor,Trade Editorial,London
+e-1005,e-1004,Rufus Navarro,Editorial Assistant,Trade Editorial,London
+e-1006,e-1004,Malia Belmonte,Senior Editor,Trade Editorial,New York
+e-1007,e-1004,Ingrid Achebe,Senior Editor,Trade Editorial,Remote
+e-1008,e-1004,Celeste Lindgren,Associate Editor,Trade Editorial,New York
+e-1009,e-1004,Soren Kowalczyk,Associate Editor,Trade Editorial,Remote
+e-1010,e-1004,Quentin Jessup,Senior Editor,Trade Editorial,New York
+e-1011,e-1003,Elio Garnier,Executive Editor,Trade Editorial,Boston
+e-1012,e-1011,Paloma Satterfield,Senior Editorial Assistant,Trade Editorial,New York
+e-1013,e-1012,Florian Montague,Senior Editorial Assistant,Trade Editorial,Boston
+e-1014,e-1013,Vida Bramhall,Editorial Assistant,Trade Editorial,Boston
+e-1015,e-1013,Gus Quaresma,Editorial Assistant,Trade Editorial,New York
+e-1016,e-1013,Lila Nakashima,Editorial Assistant,Trade Editorial,London
+e-1017,e-1012,Lionel Ekwueme,Editorial Assistant,Trade Editorial,New York
+e-1018,e-1012,Pilar Takeda,Editorial Assistant,Trade Editorial,Boston
+e-1019,e-1011,Willa Esposito,Associate Editor,Trade Editorial,New York
+e-1020,e-1011,Odette Moreau,Associate Editor,Trade Editorial,Remote
+e-1021,e-1003,Lars Ferro,Executive Editor,Trade Editorial,London
+e-1022,e-1021,Emeka Rinaldi,Editorial Assistant,Trade Editorial,Remote
+e-1023,e-1021,Soren Locklear,Associate Editor,Trade Editorial,Boston
+e-1024,e-1021,Aaron Amari,Associate Editor,Trade Editorial,New York
+e-1025,e-1021,Isak Petrakis,Editorial Assistant,Trade Editorial,Boston
+e-1026,e-1021,Dina Yeboah,Senior Editor,Trade Editorial,Boston
+e-1027,e-1002,Juno Marchetti,"Editorial Director, Academic",Academic Editorial,London
+e-1028,e-1027,Yosef Amari,Executive Editor,Academic Editorial,New York
+e-1029,e-1028,Zadie Blackwood,Developmental Editor,Academic Editorial,Boston
+e-1030,e-1028,Dina Mbeki,Editorial Assistant,Academic Editorial,New York
+e-1031,e-1028,Jalen Balogun,Editorial Assistant,Academic Editorial,Remote
+e-1032,e-1028,Gemma Blackwood,Developmental Editor,Academic Editorial,New York
+e-1033,e-1027,Hazel Cavendish,Executive Editor,Academic Editorial,Boston
+e-1034,e-1033,Aaliyah Mbeki,Acquisitions Editor,Academic Editorial,London
+e-1035,e-1033,Malia Drummond,Senior Acquisitions Editor,Academic Editorial,New York
+e-1036,e-1035,Nils Toussaint,Senior Editorial Assistant,Academic Editorial,New York
+e-1037,e-1036,Orla Castellanos,Editorial Assistant,Academic Editorial,London
+e-1038,e-1036,Jada Sekibo,Editorial Assistant,Academic Editorial,New York
+e-1039,e-1027,Magnus Yeboah,Executive Editor,Academic Editorial,London
+e-1040,e-1039,Henrik Wainwright,Acquisitions Editor,Academic Editorial,New York
+e-1041,e-1039,Emeka Oyelaran,Editorial Assistant,Academic Editorial,Boston
+e-1042,e-1039,Keiko Drummond,Senior Acquisitions Editor,Academic Editorial,Boston
+e-1043,e-1042,Willa Barrow,Editorial Assistant,Academic Editorial,New York
+e-1044,e-1039,Fiona Albescu,Editorial Assistant,Academic Editorial,New York
+e-1045,e-1027,Esme Calloway,Developmental Editor,Academic Editorial,Boston
+e-1046,e-1027,Lionel Takeda,Developmental Editor,Academic Editorial,New York
+e-1047,e-1002,Bodhi Sekibo,"Publishing Director, Children's",Children's Books,London
+e-1048,e-1047,Imogen Takeda,Senior Editor,Children's Books,New York
+e-1049,e-1048,Dante Whitcombe,Senior Editorial Assistant,Children's Books,Remote
+e-1050,e-1049,Cecil Ueda,Senior Editorial Assistant,Children's Books,New York
+e-1051,e-1050,Ingrid Ueda,Editorial Assistant,Children's Books,New York
+e-1052,e-1050,Pilar Whitcombe,Editorial Assistant,Children's Books,New York
+e-1053,e-1050,Nadia Quaresma,Editorial Assistant,Children's Books,New York
+e-1054,e-1049,Bram Vasquez,Editorial Assistant,Children's Books,New York
+e-1055,e-1048,Kira Lowell,Associate Editor,Children's Books,New York
+e-1056,e-1048,Felix Darrow,Editor,Children's Books,New York
+e-1057,e-1048,Eero Montague,Associate Editor,Children's Books,New York
+e-1058,e-1048,Indira Calloway,Associate Editor,Children's Books,London
+e-1059,e-1001,Suri Blackwood,"Vice President, Sales",Sales,New York
+e-1060,e-1059,Dante Abernathy,"Director, Trade Sales",Trade Sales,New York
+e-1061,e-1060,Nadia Iyer,Regional Sales Manager,Trade Sales,Boston
+e-1062,e-1061,Camila Albescu,Sales Assistant,Trade Sales,New York
+e-1063,e-1061,Leonie Yamada,Key Account Manager,Trade Sales,London
+e-1064,e-1061,Astrid Takeda,Field Sales Representative,Trade Sales,Remote
+e-1065,e-1061,Rafa Ebner,Sales Assistant,Trade Sales,London
+e-1066,e-1061,Nils Rosenthal,Senior Key Account Manager,Trade Sales,New York
+e-1067,e-1066,Imogen Corrigan,Sales Assistant,Trade Sales,New York
+e-1068,e-1066,Quentin Delacroix,Sales Assistant,Trade Sales,Remote
+e-1069,e-1061,Enzo Gallo,Sales Assistant,Trade Sales,London
+e-1070,e-1060,Elio Holloway,Regional Sales Manager,Trade Sales,New York
+e-1071,e-1070,Amir Achebe,Key Account Manager,Trade Sales,Boston
+e-1072,e-1070,Henrik Achebe,Senior Key Account Manager,Trade Sales,New York
+e-1073,e-1072,Aurora Blackwood,Sales Assistant,Trade Sales,Remote
+e-1074,e-1070,Enzo Merriweather,Key Account Manager,Trade Sales,London
+e-1075,e-1070,Malia Amari,Sales Assistant,Trade Sales,Boston
+e-1076,e-1060,Odette Calloway,Key Account Manager,Trade Sales,Remote
+e-1077,e-1060,Valeria Oyelaran,Key Account Manager,Trade Sales,Remote
+e-1078,e-1059,Zane Ferro,"Director, Academic Sales",Academic Sales,Boston
+e-1079,e-1078,Suri Kaminski,Regional Sales Manager,Academic Sales,New York
+e-1080,e-1079,Imogen Albescu,Sales Coordinator,Academic Sales,New York
+e-1081,e-1079,Rafa Calloway,Learning Consultant,Academic Sales,New York
+e-1082,e-1079,Lorcan Adeyemi,Learning Consultant,Academic Sales,London
+e-1083,e-1079,Leonie Bakshi,Sales Representative,Academic Sales,Remote
+e-1084,e-1079,Malik Calloway,Senior Sales Representative,Academic Sales,New York
+e-1085,e-1084,Magnus Ueda,Sales Coordinator,Academic Sales,Remote
+e-1086,e-1084,Lorcan Carrow,Sales Coordinator,Academic Sales,New York
+e-1087,e-1084,Darius Lowell,Sales Coordinator,Academic Sales,Remote
+e-1088,e-1079,Camila Redfern,Sales Representative,Academic Sales,New York
+e-1089,e-1079,Olu Rosenthal,Sales Coordinator,Academic Sales,Boston
+e-1090,e-1078,Saoirse Cavendish,Regional Sales Manager,Academic Sales,New York
+e-1091,e-1090,Edie Redfern,Sales Representative,Academic Sales,Boston
+e-1092,e-1090,Benji Thackeray,Senior Learning Consultant,Academic Sales,London
+e-1093,e-1092,Nico Pemberton,Sales Coordinator,Academic Sales,New York
+e-1094,e-1059,Remy Holloway,"Director, International Sales",International Sales,New York
+e-1095,e-1094,Thea Achebe,Export Sales Manager,International Sales,Remote
+e-1096,e-1095,Alma Ekwueme,Sales Coordinator,International Sales,Remote
+e-1097,e-1095,Zane Locklear,International Sales Associate,International Sales,Remote
+e-1098,e-1095,Leonie Gallo,International Sales Associate,International Sales,New York
+e-1099,e-1094,Gemma Kaminski,Export Sales Manager,International Sales,Boston
+e-1100,e-1099,Leif Moreau,Sales Coordinator,International Sales,Remote
+e-1101,e-1099,Bram Thackeray,Senior International Sales Associate,International Sales,Boston
+e-1102,e-1101,Suri Petrakis,Sales Coordinator,International Sales,Remote
+e-1103,e-1099,Mira Darrow,International Sales Associate,International Sales,New York
+e-1104,e-1099,Benji Blackwood,Sales Coordinator,International Sales,New York
+e-1105,e-1099,Lionel Ambrose,Sales Coordinator,International Sales,Boston
+e-1106,e-1099,Kamal Boateng,Senior International Sales Associate,International Sales,New York
+e-1107,e-1106,Leif Fitzroy,Senior Sales Coordinator,International Sales,New York
+e-1108,e-1107,Bram Halloran,Sales Coordinator,International Sales,New York
+e-1109,e-1107,Fiona Castellanos,Sales Coordinator,International Sales,Boston
+e-1110,e-1107,Remy Thackeray,Sales Coordinator,International Sales,New York
+e-1111,e-1106,Ida Kaminski,Senior Sales Coordinator,International Sales,London
+e-1112,e-1111,Callum Holloway,Sales Coordinator,International Sales,London
+e-1113,e-1111,Bram Albescu,Sales Coordinator,International Sales,New York
+e-1114,e-1111,Thea Kessler,Sales Coordinator,International Sales,New York
+e-1115,e-1099,Elise Ebner,Senior Sales Coordinator,International Sales,London
+e-1116,e-1115,Bea Boateng,Sales Coordinator,International Sales,New York
+e-1117,e-1115,Gideon Fitzroy,Sales Coordinator,International Sales,London
+e-1118,e-1115,Felix Moreau,Senior Sales Coordinator,International Sales,Boston
+e-1119,e-1118,Teo Kaminski,Sales Coordinator,International Sales,Remote
+e-1120,e-1118,Zadie Sauvage,Sales Coordinator,International Sales,New York
+e-1121,e-1118,Amir Birkeland,Sales Coordinator,International Sales,Boston
+e-1122,e-1094,Rufus Hayashi,Export Sales Manager,International Sales,New York
+e-1123,e-1122,Brielle Ibarra,International Sales Associate,International Sales,Boston
+e-1124,e-1122,Esme Vasquez,Sales Coordinator,International Sales,Boston
+e-1125,e-1122,Cecil Montague,International Sales Associate,International Sales,New York
+e-1126,e-1122,Rocco Kagame,Sales Coordinator,International Sales,Boston
+e-1127,e-1122,Cyrus Chatterjee,Sales Coordinator,International Sales,Boston
+e-1128,e-1122,Imogen Galloway,International Sales Associate,International Sales,New York
+e-1129,e-1122,Eamon Marlowe,Senior Sales Coordinator,International Sales,New York
+e-1130,e-1129,Dante Iyer,Sales Coordinator,International Sales,New York
+e-1131,e-1129,Eamon Halloran,Sales Coordinator,International Sales,London
+e-1132,e-1129,Hamid Adeyemi,Sales Coordinator,International Sales,London
+e-1133,e-1001,Farah Blackwood,"Vice President, Marketing",Marketing,Remote
+e-1134,e-1133,Rosalind Nordahl,"Director, Trade Marketing",Trade Marketing,Remote
+e-1135,e-1134,Thea Wainwright,Marketing Manager,Trade Marketing,London
+e-1136,e-1135,Alma Locklear,Senior Marketing Associate,Trade Marketing,Remote
+e-1137,e-1136,Bea Iyer,Marketing Assistant,Trade Marketing,London
+e-1138,e-1136,Teo Moreau,Marketing Assistant,Trade Marketing,Boston
+e-1139,e-1135,Rhea Ekwueme,Senior Marketing Associate,Trade Marketing,Remote
+e-1140,e-1139,Adele Eastwick,Marketing Assistant,Trade Marketing,Boston
+e-1141,e-1139,Ansel Rosenthal,Marketing Assistant,Trade Marketing,Remote
+e-1142,e-1135,Ari Chatterjee,Marketing Associate,Trade Marketing,New York
+e-1143,e-1135,Celeste Sorensen,Senior Digital Marketing Specialist,Trade Marketing,Remote
+e-1144,e-1143,Lila Lowell,Marketing Assistant,Trade Marketing,Remote
+e-1145,e-1143,Asha Albescu,Marketing Assistant,Trade Marketing,New York
+e-1146,e-1135,Camila Rinaldi,Marketing Associate,Trade Marketing,Remote
+e-1147,e-1135,Yosef Moreau,Marketing Associate,Trade Marketing,Remote
+e-1148,e-1134,Farah Kagame,Marketing Manager,Trade Marketing,New York
+e-1149,e-1148,Desmond Navarro,Digital Marketing Specialist,Trade Marketing,New York
+e-1150,e-1148,Nadia Navarro,Senior Marketing Associate,Trade Marketing,New York
+e-1151,e-1150,Thea Montague,Marketing Assistant,Trade Marketing,New York
+e-1152,e-1150,Lorcan Ashdown,Marketing Assistant,Trade Marketing,Boston
+e-1153,e-1148,Quentin Ueda,Marketing Assistant,Trade Marketing,Remote
+e-1154,e-1148,Rosalind Hartigan,Marketing Assistant,Trade Marketing,Boston
+e-1155,e-1148,Keiko Silvestri,Marketing Assistant,Trade Marketing,New York
+e-1156,e-1148,Farah Kavanagh,Senior Marketing Assistant,Trade Marketing,New York
+e-1157,e-1156,Rocco Ferro,Marketing Assistant,Trade Marketing,London
+e-1158,e-1156,Marisol Boateng,Marketing Assistant,Trade Marketing,London
+e-1159,e-1156,Ivo Fairbanks,Marketing Assistant,Trade Marketing,New York
+e-1160,e-1134,Ulla Quaresma,Marketing Manager,Trade Marketing,New York
+e-1161,e-1160,Selma Galloway,Marketing Associate,Trade Marketing,Remote
+e-1162,e-1160,Odette Ibarra,Marketing Assistant,Trade Marketing,New York
+e-1163,e-1160,Kira Stanhope,Digital Marketing Specialist,Trade Marketing,Remote
+e-1164,e-1160,Mae Rinaldi,Marketing Associate,Trade Marketing,Remote
+e-1165,e-1160,Bianca Carrow,Marketing Assistant,Trade Marketing,Remote
+e-1166,e-1160,Valeria Amari,Marketing Assistant,Trade Marketing,New York
+e-1167,e-1133,Callum Castellanos,Director of Publicity,Publicity,New York
+e-1168,e-1167,Orla Kaminski,Publicity Manager,Publicity,New York
+e-1169,e-1168,Camila Yeboah,Publicist,Publicity,New York
+e-1170,e-1168,Hazel Ueda,Publicist,Publicity,London
+e-1171,e-1168,Elise Ekwueme,Publicist,Publicity,London
+e-1172,e-1168,Ivo Yamada,Publicist,Publicity,Remote
+e-1173,e-1168,Bianca Pemberton,Publicity Assistant,Publicity,New York
+e-1174,e-1167,Alma Blackwood,Publicity Manager,Publicity,New York
+e-1175,e-1174,Ezra Albescu,Publicity Assistant,Publicity,New York
+e-1176,e-1174,Ida Vasquez,Publicist,Publicity,Boston
+e-1177,e-1174,Darius Ekwueme,Publicist,Publicity,Remote
+e-1178,e-1174,Gemma Coltrane,Publicist,Publicity,London
+e-1179,e-1174,Quentin Mahony,Publicity Assistant,Publicity,Boston
+e-1180,e-1174,Emeka Thackeray,Publicist,Publicity,Remote
+e-1181,e-1167,Leonie Sorensen,Publicity Manager,Publicity,Boston
+e-1182,e-1181,Ravi Drummond,Publicist,Publicity,New York
+e-1183,e-1181,Malik Yeboah,Senior Publicity Assistant,Publicity,New York
+e-1184,e-1183,Carmen Mahony,Publicity Assistant,Publicity,New York
+e-1185,e-1167,Ravi Kavanagh,Publicity Assistant,Publicity,Boston
+e-1186,e-1167,Jalen Petrakis,Publicist,Publicity,Boston
+e-1187,e-1133,Willa Galloway,"Director, Academic Marketing",Academic Marketing,New York
+e-1188,e-1187,Benji Boateng,Marketing Manager,Academic Marketing,New York
+e-1189,e-1188,Fiona Merriweather,Product Marketing Specialist,Academic Marketing,Boston
+e-1190,e-1188,Zuri Zamora,Product Marketing Specialist,Academic Marketing,Remote
+e-1191,e-1188,Olu Belmonte,Marketing Coordinator,Academic Marketing,Boston
+e-1192,e-1188,Suri Gallo,Senior Product Marketing Specialist,Academic Marketing,New York
+e-1193,e-1192,Amir Quaresma,Marketing Coordinator,Academic Marketing,Boston
+e-1194,e-1192,Silas Ueda,Marketing Coordinator,Academic Marketing,London
+e-1195,e-1192,Lars Adeyemi,Marketing Coordinator,Academic Marketing,New York
+e-1196,e-1188,Adrian Boateng,Senior Product Marketing Specialist,Academic Marketing,Boston
+e-1197,e-1196,Adele Ambrose,Marketing Coordinator,Academic Marketing,Remote
+e-1198,e-1196,Rafa Iyer,Senior Marketing Coordinator,Academic Marketing,Remote
+e-1199,e-1198,Esme Montague,Marketing Coordinator,Academic Marketing,Remote
+e-1200,e-1198,Hamid Fairbanks,Marketing Coordinator,Academic Marketing,London
+e-1201,e-1196,Henrik Ambrose,Marketing Coordinator,Academic Marketing,Boston
+e-1202,e-1188,Indira Desai,Product Marketing Specialist,Academic Marketing,New York
+e-1203,e-1187,Lucia Kowalczyk,Marketing Manager,Academic Marketing,Boston
+e-1204,e-1203,Juno Ebner,Product Marketing Specialist,Academic Marketing,Boston
+e-1205,e-1203,Saoirse Castellanos,Marketing Coordinator,Academic Marketing,New York
+e-1206,e-1203,Eamon Marchetti,Marketing Coordinator,Academic Marketing,Remote
+e-1207,e-1203,Mae Petrakis,Marketing Coordinator,Academic Marketing,New York
+e-1208,e-1203,Lila Kessler,Product Marketing Specialist,Academic Marketing,New York
+e-1209,e-1203,Isak Locklear,Product Marketing Specialist,Academic Marketing,New York
+e-1210,e-1001,Henrik Locklear,"Vice President, Design & Production",Design & Production,New York
+e-1211,e-1210,Delphine Drummond,Creative Director,Art & Design,New York
+e-1212,e-1211,Rhea Corrigan,Art Director,Art & Design,London
+e-1213,e-1212,Ansel Ferro,Designer,Art & Design,New York
+e-1214,e-1212,Cyrus Zubiri,Senior Designer,Art & Design,Remote
+e-1215,e-1212,Astrid Mbeki,Production Artist,Art & Design,London
+e-1216,e-1212,Wes Yeboah,Designer,Art & Design,Boston
+e-1217,e-1211,Kamal Thackeray,Art Director,Art & Design,New York
+e-1218,e-1217,Nico Nakashima,Production Artist,Art & Design,New York
+e-1219,e-1217,Nico Balogun,Senior Designer,Art & Design,New York
+e-1220,e-1217,Malik Ueda,Designer,Art & Design,New York
+e-1221,e-1211,Mira Petrakis,Production Artist,Art & Design,London
+e-1222,e-1210,Lars Fairbanks,Director of Production,Production,Boston
+e-1223,e-1222,Lars Kaminski,Production Manager,Production,New York
+e-1224,e-1223,Ivo Birkeland,Senior Production Coordinator,Production,New York
+e-1225,e-1224,Leonie Birkeland,Copyeditor,Production,Boston
+e-1226,e-1224,Brielle Fairbanks,Copyeditor,Production,New York
+e-1227,e-1223,Rhea Jessup,Copyeditor,Production,Boston
+e-1228,e-1223,Nico Corrigan,Senior Copyeditor,Production,Boston
+e-1229,e-1228,Remy Carrow,Copyeditor,Production,London
+e-1230,e-1228,Tamsin Moreau,Senior Copyeditor,Production,Remote
+e-1231,e-1230,Juno Rinaldi,Copyeditor,Production,New York
+e-1232,e-1230,Aaliyah Kowalczyk,Copyeditor,Production,New York
+e-1233,e-1223,Juno Thackeray,Copyeditor,Production,Boston
+e-1234,e-1223,Kamal Kaminski,Production Coordinator,Production,New York
+e-1235,e-1223,Adele Valdivia,Copyeditor,Production,New York
+e-1236,e-1222,Magnus Whitcombe,Production Coordinator,Production,London
+e-1237,e-1210,Olu Sandoval,Director of Manufacturing,Manufacturing,New York
+e-1238,e-1237,Remy Rasmussen,Manufacturing Manager,Manufacturing,New York
+e-1239,e-1238,Zadie Darrow,Manufacturing Coordinator,Manufacturing,Remote
+e-1240,e-1238,Delphine Wainwright,Print Buyer,Manufacturing,Boston
+e-1241,e-1237,Bram Sorensen,Manufacturing Manager,Manufacturing,London
+e-1242,e-1241,Astrid Balogun,Senior Manufacturing Coordinator,Manufacturing,New York
+e-1243,e-1242,Bianca Lombardi,Senior Manufacturing Coordinator,Manufacturing,New York
+e-1244,e-1243,Bodhi Kowalczyk,Manufacturing Coordinator,Manufacturing,Remote
+e-1245,e-1243,Indira Sekibo,Manufacturing Coordinator,Manufacturing,New York
+e-1246,e-1243,Dante Ibarra,Manufacturing Coordinator,Manufacturing,Boston
+e-1247,e-1242,Tobias Lachance,Manufacturing Coordinator,Manufacturing,New York
+e-1248,e-1242,Rafa Hartigan,Manufacturing Coordinator,Manufacturing,New York
+e-1249,e-1241,Jada Halloran,Manufacturing Coordinator,Manufacturing,New York
+e-1250,e-1241,Malia Rinaldi,Print Buyer,Manufacturing,New York
+e-1251,e-1241,Pilar Locklear,Manufacturing Coordinator,Manufacturing,New York
+e-1252,e-1241,Brielle Blackwood,Manufacturing Coordinator,Manufacturing,New York
+e-1253,e-1241,Nadia Rasmussen,Manufacturing Coordinator,Manufacturing,Boston
+e-1254,e-1241,Yosef Redfern,Manufacturing Coordinator,Manufacturing,London
+e-1255,,Felix Mbeki,Chief Operating Officer,Senior Leadership,New York
+e-1256,e-1255,Callum Pemberton,Chief Financial Officer,Finance,New York
+e-1257,e-1256,Aiden Takeda,Controller,Accounting,New York
+e-1258,e-1257,Brielle Marchetti,Accounting Manager,Accounting,Remote
+e-1259,e-1258,Indira Kowalczyk,Senior Accountant,Accounting,Remote
+e-1260,e-1258,Malia Hayashi,Lead Accountant,Accounting,Remote
+e-1261,e-1260,Leonie Hartigan,Accounts Payable Specialist,Accounting,Boston
+e-1262,e-1260,Silas Wainwright,Accounts Payable Specialist,Accounting,London
+e-1263,e-1260,Rhea Lachance,Accounts Payable Specialist,Accounting,London
+e-1264,e-1258,Kenji Mahony,Accountant,Accounting,Boston
+e-1265,e-1258,Ulla Falconer,Accountant,Accounting,London
+e-1266,e-1258,Valeria Albescu,Accountant,Accounting,New York
+e-1267,e-1258,Joaquin Takeda,Senior Accountant,Accounting,Boston
+e-1268,e-1257,Suri Coltrane,Accounting Manager,Accounting,Boston
+e-1269,e-1268,Gemma Albescu,Lead Accountant,Accounting,London
+e-1270,e-1269,Cyrus Lindgren,Accounts Payable Specialist,Accounting,New York
+e-1271,e-1268,Wes Thackeray,Accountant,Accounting,New York
+e-1272,e-1268,Emeka Abernathy,Accountant,Accounting,New York
+e-1273,e-1268,Niamh Chatterjee,Accountant,Accounting,Boston
+e-1274,e-1268,Nadia Boateng,Senior Accountant,Accounting,New York
+e-1275,e-1268,Valeria Navarro,Accounts Payable Specialist,Accounting,New York
+e-1276,e-1257,Bodhi Marlowe,Senior Accountant,Accounting,Boston
+e-1277,e-1257,Zadie Rinaldi,Senior Accountant,Accounting,Boston
+e-1278,e-1256,Rhea Carrow,Director of Royalties,Royalties,New York
+e-1279,e-1278,Olu Montague,Royalties Manager,Royalties,Boston
+e-1280,e-1279,Juno Bakshi,Royalties Assistant,Royalties,Boston
+e-1281,e-1279,Alberto Lombardi,Royalties Analyst,Royalties,New York
+e-1282,e-1278,Asha Kagame,Royalties Assistant,Royalties,New York
+e-1283,e-1255,Aaron Cavendish,Chief Technology Officer,Technology,London
+e-1284,e-1283,Mae Hayashi,Director of Digital Products,Digital Products,New York
+e-1285,e-1284,Saoirse Boateng,Engineering Manager,Digital Products,Remote
+e-1286,e-1285,Zuri Barrow,QA Engineer,Digital Products,Boston
+e-1287,e-1285,Dina Holloway,Software Engineer,Digital Products,Boston
+e-1288,e-1285,Emeka Esposito,Product Designer,Digital Products,Remote
+e-1289,e-1284,Kenji Delacroix,Engineering Manager,Digital Products,London
+e-1290,e-1289,Aiden Rosenthal,QA Engineer,Digital Products,London
+e-1291,e-1289,Elio Lombardi,QA Engineer,Digital Products,Remote
+e-1292,e-1289,Celeste Zubiri,QA Engineer,Digital Products,Remote
+e-1293,e-1289,Fiona Petrakis,Software Engineer,Digital Products,New York
+e-1294,e-1289,Astrid Sorensen,Senior QA Engineer,Digital Products,New York
+e-1295,e-1294,Otis Holloway,Product Designer,Digital Products,Remote
+e-1296,e-1283,Niamh Jessup,Director of IT,Information Technology,Boston
+e-1297,e-1296,Ida Stanhope,IT Manager,Information Technology,Boston
+e-1298,e-1297,Odette Boateng,Support Analyst,Information Technology,New York
+e-1299,e-1297,Rhea Yamada,Support Analyst,Information Technology,Boston
+e-1300,e-1297,Fiona Achebe,Support Analyst,Information Technology,New York
+e-1301,e-1297,Selma Ferro,Senior Support Analyst,Information Technology,Boston
+e-1302,e-1301,Alana Sorensen,Support Analyst,Information Technology,New York
+e-1303,e-1301,Lars Redfern,Senior Support Analyst,Information Technology,New York
+e-1304,e-1303,Dina Lachance,Support Analyst,Information Technology,New York
+e-1305,e-1303,Aaliyah Eastwick,Support Analyst,Information Technology,New York
+e-1306,e-1297,Anika Esposito,Senior Systems Administrator,Information Technology,New York
+e-1307,e-1306,Asha Whitcombe,Support Analyst,Information Technology,London
+e-1308,e-1306,Elio Carrow,Support Analyst,Information Technology,New York
+e-1309,e-1297,Astrid Yeboah,Systems Administrator,Information Technology,New York
+e-1310,e-1296,Selma Barrow,IT Manager,Information Technology,London
+e-1311,e-1310,Aiden Castellanos,Support Analyst,Information Technology,Boston
+e-1312,e-1310,Rhea Garnier,Systems Administrator,Information Technology,Boston
+e-1313,e-1310,Carmen Ashdown,Support Analyst,Information Technology,Boston
+e-1314,e-1310,Mira Rasmussen,Support Analyst,Information Technology,New York
+e-1315,e-1310,Amir Merriweather,Systems Administrator,Information Technology,London
+e-1316,e-1310,Indira Toussaint,Senior Support Analyst,Information Technology,Remote
+e-1317,e-1316,Rufus Blackwood,Support Analyst,Information Technology,New York
+e-1318,e-1310,Ravi Montague,Support Analyst,Information Technology,London
+e-1319,e-1296,Celeste Ibarra,IT Manager,Information Technology,New York
+e-1320,e-1319,Carmen Montague,Senior Support Analyst,Information Technology,Boston
+e-1321,e-1320,Ulla Achebe,Support Analyst,Information Technology,New York
+e-1322,e-1320,Edie Rinaldi,Support Analyst,Information Technology,New York
+e-1323,e-1319,Arden Hartigan,Support Analyst,Information Technology,London
+e-1324,e-1319,Orla Ekwueme,Systems Administrator,Information Technology,Boston
+e-1325,e-1319,Brielle Chatterjee,Systems Administrator,Information Technology,New York
+e-1326,e-1319,Greer Ferro,Systems Administrator,Information Technology,London
+e-1327,e-1319,Carmen Desai,Support Analyst,Information Technology,New York
+e-1328,e-1319,Amir Toussaint,Senior Support Analyst,Information Technology,London
+e-1329,e-1328,Leonie Kagame,Support Analyst,Information Technology,New York
+e-1330,e-1328,Mira Amari,Senior Support Analyst,Information Technology,New York
+e-1331,e-1330,Willa Boateng,Support Analyst,Information Technology,New York
+e-1332,e-1330,Aurora Fitzroy,Support Analyst,Information Technology,Remote
+e-1333,e-1255,Anika Nakashima,"Vice President, Operations",Operations,New York
+e-1334,e-1333,Eero Hartigan,Director of Distribution,Distribution,New York
+e-1335,e-1334,Yosef Ashdown,Warehouse Manager,Distribution,New York
+e-1336,e-1335,Arden Drummond,Customer Service Representative,Distribution,Remote
+e-1337,e-1335,Aaron Albescu,Logistics Coordinator,Distribution,New York
+e-1338,e-1335,Thea Holloway,Logistics Coordinator,Distribution,New York
+e-1339,e-1335,Thea Lombardi,Logistics Coordinator,Distribution,Remote
+e-1340,e-1334,Remy Stanhope,Warehouse Manager,Distribution,New York
+e-1341,e-1340,Thea Whitcombe,Customer Service Representative,Distribution,London
+e-1342,e-1340,Joaquin Yeboah,Senior Logistics Coordinator,Distribution,Boston
+e-1343,e-1342,Vida Kavanagh,Logistics Coordinator,Distribution,New York
+e-1344,e-1342,Leonie Toussaint,Logistics Coordinator,Distribution,London
+e-1345,e-1342,Kira Belmonte,Logistics Coordinator,Distribution,Remote
+e-1346,e-1334,Rocco Adeyemi,Warehouse Manager,Distribution,Boston
+e-1347,e-1346,Alberto Ueda,Senior Logistics Coordinator,Distribution,London
+e-1348,e-1347,Hamid Calloway,Logistics Coordinator,Distribution,Remote
+e-1349,e-1346,Aurora Falconer,Customer Service Representative,Distribution,Boston
+e-1350,e-1346,Edie Ebner,Inventory Analyst,Distribution,Boston
+e-1351,e-1346,Aurora Amari,Inventory Analyst,Distribution,Remote
+e-1352,e-1346,Gus Ueda,Customer Service Representative,Distribution,New York
+e-1353,e-1333,Elise Darrow,"Director, Contracts & Rights",Contracts & Rights,New York
+e-1354,e-1353,Eero Mahony,Rights Manager,Contracts & Rights,Boston
+e-1355,e-1354,Cecil Birkeland,Permissions Coordinator,Contracts & Rights,Boston
+e-1356,e-1354,Vida Ebner,Permissions Coordinator,Contracts & Rights,London
+e-1357,e-1354,Pilar Fairbanks,Permissions Coordinator,Contracts & Rights,Remote
+e-1358,e-1354,Leif Birkeland,Permissions Coordinator,Contracts & Rights,New York
+e-1359,e-1354,Ansel Merriweather,Contracts Specialist,Contracts & Rights,New York
+e-1360,e-1354,Zuri Hayashi,Contracts Specialist,Contracts & Rights,London
+e-1361,e-1353,Thea Merriweather,Rights Manager,Contracts & Rights,New York
+e-1362,e-1361,Orla Birkeland,Senior Permissions Coordinator,Contracts & Rights,Remote
+e-1363,e-1362,Otis Balogun,Permissions Coordinator,Contracts & Rights,Boston
+e-1364,e-1362,Henrik Birkeland,Permissions Coordinator,Contracts & Rights,New York
+e-1365,e-1361,Aurora Zubiri,Permissions Coordinator,Contracts & Rights,New York
+e-1366,e-1361,Delphine Ibarra,Contracts Specialist,Contracts & Rights,London
+e-1367,e-1361,Dina Stanhope,Contracts Specialist,Contracts & Rights,Remote
+e-1368,e-1255,Yosef Corrigan,"Vice President, People",People,London
+e-1369,e-1368,Zuri Gallo,"Director, Human Resources",Human Resources,Boston
+e-1370,e-1369,Rhea Barrow,HR Manager,Human Resources,London
+e-1371,e-1370,Silas Galloway,Senior Recruiter,Human Resources,Boston
+e-1372,e-1371,Malik Kessler,HR Coordinator,Human Resources,Boston
+e-1373,e-1371,Ravi Rosenthal,Senior HR Coordinator,Human Resources,New York
+e-1374,e-1373,Marisol Holloway,HR Coordinator,Human Resources,Remote
+e-1375,e-1370,Adele Adeyemi,Senior HR Generalist,Human Resources,Boston
+e-1376,e-1375,Indira Ashdown,HR Coordinator,Human Resources,New York
+e-1377,e-1370,Bodhi Nordahl,HR Coordinator,Human Resources,New York
+e-1378,e-1369,Aiden Kessler,HR Manager,Human Resources,Boston
+e-1379,e-1378,Aiden Hayashi,HR Generalist,Human Resources,London
+e-1380,e-1378,Ingrid Yeboah,Recruiter,Human Resources,London
+e-1381,e-1369,Hamid Barrow,HR Coordinator,Human Resources,New York
+e-1382,e-1369,Fiona Belmonte,Recruiter,Human Resources,New York
