@@ -1386,8 +1386,8 @@ function renderSunburst(orgData, weightFn) {
         .join("text")
         .attr("class", "sunburst-label")
         .attr("fill-opacity", d => +labelVisible(d.current))
-        .attr("transform",    d => labelTransform(geom(d.current, d.data)))
-        .each(function(d) { setLabelTspans(this, getLabelLines(geom(d.current, d.data))); });
+        .each(function(d) { setLabelTspans(this, getLabelLines(geom(d.current, d.data))); })
+        .attr("transform",    function (d) { return labelTransform(geom(d.current, d.data), this.__lines); });
 
     // Center "zoom out" circle — keyboard users zoom out via the tree (Left arrow / parent)
     sbG.append("circle")
@@ -1606,7 +1606,7 @@ function zoomSunburst(event, p) {
         if (show) setLabelTspans(this, getLabelLines(geom(d.target, d.data)));
     });
     label.transition(t)
-        .attrTween("transform", d => () => labelTransform(geom(d.current, d.data)))
+        .attrTween("transform", function (d) { const el = this; return () => labelTransform(geom(d.current, d.data), el.__lines); })
         .attrTween("fill-opacity", function (d) {
             const el = this;
             return u => {
@@ -1764,7 +1764,7 @@ function renderView() {
         const lines = (c.y1 <= lim && c.y0 >= 1 && c.x1 > c.x0) ? getLabelLines(g) : [];
         setLabelTspans(this, lines);
         this.setAttribute("fill-opacity", lines.length ? 1 : 0);
-        this.setAttribute("transform", labelTransform(g));
+        this.setAttribute("transform", labelTransform(g, lines));
     });
     updateZoomControls();
 }
@@ -1966,10 +1966,11 @@ function labelVisible(d) {
     return s.y1 <= depthLimit() && s.y0 >= 1 && getLabelLines(geom(s, s.data)).length > 0;
 }
 // d: screen geometry from geom()
-function labelTransform(d) {
+// d: screen geometry from geom(); lines: the label's text, for its placement
+function labelTransform(d, lines) {
     const deg = (d.x0 + d.x1) / 2 * 180 / Math.PI;
     const x = ((deg % 360) + 360) % 360;
-    const y = (rPx(d.y0) + rPx(d.y1)) / 2;
+    const y = labelPlacement(d, lines) ?? (rPx(d.y0) + rPx(d.y1)) / 2;
     return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
 }
 // Progressive collapse — keeps first name visible as long as possible:
@@ -2001,20 +2002,29 @@ function labelTextWidth(str) {
     return w;
 }
 // g: screen geometry from geom(); lines: 1 or 2 strings
-function labelFits(g, lines) {
-    if (!g || !lines || !lines.length) return false;
+// Where a label's centre sits along the radius, or null if it can't fit.
+// A label is centred in its ring when it fits there; otherwise it moves
+// outward, where the wedge is wider, as far as the outer padding allows.
+function labelPlacement(g, lines) {
+    if (!g || !lines || !lines.length) return null;
     const rIn  = rPx(g.y0), rOut = rPx(g.y1) - 1;    // arcs are drawn 1px short of y1
-    const rMid = (rPx(g.y0) + rPx(g.y1)) / 2;        // where labelTransform puts the text
+    const rMid = (rPx(g.y0) + rPx(g.y1)) / 2;
     const w    = Math.max(...lines.map(labelTextWidth));
-    if (rMid - w / 2 < rIn + LABEL_PAD_R || rMid + w / 2 > rOut - LABEL_PAD_R) return false;
+    if (w > rOut - rIn - 2 * LABEL_PAD_R) return null;
     // Half the label's height across the slice: line spacing 1.1em, plus
     // half a line, plus the shadow's 1px offset and blur
     const halfH = 11 * (0.55 * (lines.length - 1) + 0.5) + 2;
     const a  = Math.min(Math.PI, (g.x1 - g.x0) / 2);  // half the slice's angle
-    const r1 = rMid - w / 2;                          // the label's inner (narrowest) end
-    // Distance from the label's inner corner to the slice's side
-    return r1 * Math.sin(a) - halfH * Math.cos(a) >= LABEL_PAD_T;
+    // The label's inner (narrowest) end must be at least this far out to stay
+    // LABEL_PAD_T clear of the slice's sides: r1·sin(a) − halfH·cos(a) ≥ pad
+    const sinA = Math.sin(a), cosA = Math.cos(a);
+    const rNeed = sinA > 1e-9 ? (LABEL_PAD_T + halfH * cosA) / sinA
+                              : (halfH * cosA <= -LABEL_PAD_T ? -Infinity : Infinity);
+    const r1 = Math.max(rMid - w / 2, rIn + LABEL_PAD_R, rNeed);
+    if (r1 + w > rOut - LABEL_PAD_R) return null;
+    return r1 + w / 2;
 }
+function labelFits(g, lines) { return labelPlacement(g, lines) !== null; }
 
 // Title labels: the full title on 1-3 lines, then a shortened form on 1-3 lines.
 const TITLE_ABBR = [
