@@ -1450,6 +1450,49 @@ function renderSunburst(orgData, weightFn) {
     setupMagnifier();
 }
 
+// The two lines in the centre circle for the focused person: their name, or
+// in Titles mode their title (shortened and wrapped to fit; the name when
+// they have no title). Lines that are still too wide end in an ellipsis.
+const CENTRE_FONT = '600 11.52px "Helvetica Neue", sans-serif';
+function centreTextWidth(str) { _labelCtx.font = CENTRE_FONT; return _labelCtx.measureText(str).width; }
+function centreLines(p) {
+    const availW = (radius / SLICE_SIZE_FACTOR - 10) * 2 - 8;
+    const fits = lines => lines.every(l => centreTextWidth(l) <= availW);
+    const ellipsize = l => {
+        if (centreTextWidth(l) <= availW) return l;
+        while (l.length > 1 && centreTextWidth(l + "\u2026") > availW) l = l.slice(0, -1);
+        return l.trimEnd() + "\u2026";
+    };
+    const title = (p.data.title || "").trim();
+    if (labelMode === "title" && title) {
+        let short = title;
+        for (const [re, abbr] of TITLE_ABBR) short = short.replace(re, abbr);
+        for (const t of short === title ? [title] : [title, short]) {
+            const words = t.split(/\s+/).filter(Boolean);
+            if (fits([t])) return [t, ""];
+            // Every two-line break, measured in the centre's own (bolder) font;
+            // keep the most balanced one that fits
+            let best = null, bestW = Infinity;
+            for (let i = 1; i < words.length; i++) {
+                const l = [words.slice(0, i).join(" ").replace(/,$/, ""), words.slice(i).join(" ")];
+                const w = Math.max(...l.map(centreTextWidth));
+                if (w <= availW && w < bestW) { best = l; bestW = w; }
+            }
+            if (best) return best;
+        }
+        const two = wrapWords(short.split(/\s+/).filter(Boolean), 2) || [short];
+        return [ellipsize(two[0].replace(/,$/, "")), ellipsize(two[1] || "")];
+    }
+    const parts = (p.data.name || "").split(" ");
+    return [ellipsize(parts[0] || ""), ellipsize(parts.slice(1).join(" "))];
+}
+function refreshCentreText() {
+    if (!svg || !currentSbNode || currentSbNode === root) return;
+    const [line1, line2] = centreLines(currentSbNode);
+    svg.select(".center-name-line1").text(line1);
+    svg.select(".center-name-line2").text(line2).attr("opacity", line2 ? 1 : 0);
+}
+
 function zoomSunburst(event, p) {
     if (!p) return;
     if (event && event.defaultPrevented) return;   // click that ended a drag-pan
@@ -1469,14 +1512,7 @@ function zoomSunburst(event, p) {
         svg.select(".center-name-line1").transition().duration(300).attr("opacity", 0);
         svg.select(".center-name-line2").transition().duration(300).attr("opacity", 0);
     } else {
-        const nameParts = (p.data.name || "").split(" ");
-        const line1 = nameParts[0] || "";
-        const line2 = nameParts.slice(1).join(" ");
-        // Clamp each line to fit within circle diameter minus margin
-        const availW = (centerR - margin) * 2;
-        const charPx = 7;
-        const maxCh  = Math.max(1, Math.floor(availW / charPx));
-        const trunc  = s => s.length > maxCh ? s.slice(0, maxCh - 1) + "\u2026" : s;
+        const [line1, line2] = centreLines(p);
         // Logo shifts to top interior of circle
         const logoY   = -centerR + margin;
         const line1Y  = logoY + logoH + margin + 11;
@@ -1485,12 +1521,12 @@ function zoomSunburst(event, p) {
             .transition().duration(500)
             .attr("x", -48).attr("y", logoY);
         svg.select(".center-name-line1")
-            .text(trunc(line1))
+            .text(line1)
             .attr("y", line1Y)
             .transition().duration(500)
             .attr("opacity", 1);
         svg.select(".center-name-line2")
-            .text(trunc(line2))
+            .text(line2)
             .attr("y", line2Y)
             .transition().duration(500)
             .attr("opacity", line2 ? 1 : 0);
@@ -1885,7 +1921,7 @@ function setMagnifierHidden(hidden) {
             if (!input.checked) return;
             labelMode = input.value;
             try { localStorage.setItem("chartLabelMode", labelMode); } catch (e) {}
-            if (svg) renderView();
+            if (svg) { renderView(); refreshCentreText(); }
         });
     });
 })();

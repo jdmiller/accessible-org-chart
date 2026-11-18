@@ -243,9 +243,34 @@ test.describe('Sunburst zoom', () => {
     expect(titles.length).toBeGreaterThan(0);
     // Every label is the person's title, in full or shortened form
     expect(titles.every(l => l.isTitle)).toBe(true);
-    // The centre and bottom label still name the focused person
-    const focus = await page.evaluate(() => currentSbNode.data.name);
-    expect(await page.textContent('.center-name-line1')).toBe(focus.split(' ')[0]);
+    // The centre circle follows the switch too
+    const centre = () => page.evaluate(() =>
+      [document.querySelector('.center-name-line1').textContent, document.querySelector('.center-name-line2').textContent].join(' ').trim());
+    const focusNode = await page.evaluate(() => ({ name: currentSbNode.data.name, title: currentSbNode.data.title }));
+    // In Titles mode the centre shows the title form (not the name)
+    const showsTitle = async () => {
+      const c = await centre();
+      const expected = await page.evaluate(() => centreLines(currentSbNode).join(' ').trim());
+      const name = await page.evaluate(() => currentSbNode.data.name);
+      return c === expected && c !== name;
+    };
+    expect(await showsTitle()).toBe(true);
+    await page.check('#label-mode input[value="name"]');
+    expect(await centre()).toBe(focusNode.name);
+    await page.check('#label-mode input[value="title"]');
+    expect(await showsTitle()).toBe(true);
+
+    // Titles stay through real expand / collapse clicks
+    const box = await page.locator('#chart-container svg').boundingBox();
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);        // centre: up a level
+    await page.waitForTimeout(1000);
+    await page.mouse.click(box.x + box.width / 2 + 100, box.y + box.height / 2 - 30);  // a slice: expand
+    await page.waitForTimeout(1000);
+    const after = await shown();
+    expect(after.length).toBeGreaterThan(0);
+    expect(after.every(l => l.isTitle)).toBe(true);
+    const f2 = await page.evaluate(() => ({ name: currentSbNode.data.name, title: currentSbNode.data.title }));
+    if (f2.title) expect(await showsTitle()).toBe(true);
 
     await page.reload();
     await waitForLoad(page);
